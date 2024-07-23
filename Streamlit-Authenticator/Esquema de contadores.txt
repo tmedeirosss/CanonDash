@@ -1,0 +1,27 @@
+Total(101) = Total de impressões
+
+BK(108) = total bk
+
+Total Large(112) 
+
+FL(229) + IL(321) = Cópias + Impressões folha grande
+
+FS(230) + IS(322) = Cópias + Impressões folha pequena
+
+Numeradores disponíveis:
+
+101 = Total
+102 = Total 2
+108 = Total p&b
+112 = Total Grande p&b
+113 = Total p&b pequeno
+229 = Cópia (Todas as cores + uma cor/Grande)
+230 = Cópia (Todas as cores + uma cor/Pequena)
+321 = Impressão (Todas as cores + uma cor/Grande)
+322 = Impressão (Todas as cores + uma cor/Pequena)
+
+
+A4Pb = 113
+A4Cor = (230 + 322) - 113
+A3Pb = 112
+A3cor = (229 +321) - 112
