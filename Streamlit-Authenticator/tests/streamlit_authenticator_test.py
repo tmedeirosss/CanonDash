@@ -12,7 +12,8 @@ import pyodbc
 import pandas as pd
 import app
 
-
+# Configurar o layout como 'wide'
+st.set_page_config(layout="wide")
 
 # Loading config file
 with open('../config.yaml', 'r', encoding='utf-8') as file:

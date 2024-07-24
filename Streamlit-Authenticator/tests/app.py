@@ -7,6 +7,7 @@ import pyodbc
 import pandas as pd
 import plotly.express as px
 
+
 # Loading config file
 with open('../config.yaml', 'r', encoding='utf-8') as file:
     config = yaml.load(file, Loader=SafeLoader)
@@ -94,27 +95,49 @@ def consulta(valor_id):
             # Mostrar o gráfico no Streamlit
             st.plotly_chart(ig)
             
+            
+            # Adicionar uma seleção para escolher um SerialNumber
+            selected_serial = st.selectbox('Selecione um equipamento para detalhes', data_unique['SerialNumber'])
+                
+            #st.write(data_unique[['SerialNumber', 'start_101']]) Exibir tabela de totais
+
+            equipamento_data = data[data['SerialNumber'] == selected_serial]
+            equipamento_data = data[data['SerialNumber'] == selected_serial]
+            #st.write(equipamento_data) exibir dados inteiros do cliente
+            
             # Usar layout de colunas do Streamlit
+            
+            a4pbserie = equipamento_data.start_113.mean()
+            equipamento_data.start_112.fillna(0, inplace = True)
+            a3pbserie = equipamento_data.start_112.astype(int).mean().astype(int)
+            a4corserie = (equipamento_data.start_230 + equipamento_data.start_322)-equipamento_data.start_113
+            a3corserie = (equipamento_data.start_229 + equipamento_data.start_321)-(equipamento_data.start_112.astype(float).astype(int))
+            a3corserie.fillna(0, inplace = True)
+            a3corserie.astype(float).astype(int)
+            a3corserie = a3corserie.mean().astype(int)
+            a3corserie = a3corserie if a3corserie > 0 else 0
+
             col1, col2 = st.columns(2)
 
             with col1:
-                # Adicionar uma seleção para escolher um SerialNumber
-                selected_serial = st.selectbox('Selecione um equipamento para detalhes', data_unique['SerialNumber'])
-                
-                #st.write(data_unique[['SerialNumber', 'start_101']]) Exibir tabela de totais
-
                 
 
-            # Exibir o gráfico na segunda coluna
-            #with col2:
+                pz1 = px.pie(names=('P&B', 'COR'), values=[a4pbserie,(a4corserie.mean() if a4corserie.mean() > 0 else 0)], title='Impressões A4')
+                st.plotly_chart(pz1)
+
+           
+           # Exibir o gráfico na segunda coluna
+            with col2:
+                pz2 = px.pie(names=('P&B', 'COR'), values=[a3pbserie,a3corserie], title='Impressões A3')
+                st.plotly_chart(pz2)
+                st.write(a3pbserie, a3corserie)
+
                 
 
                 
 
         # Filtrar os dados para o SerialNumber selecionado
-        equipamento_data = data[data['SerialNumber'] == selected_serial]
-        equipamento_data = data[data['SerialNumber'] == selected_serial]
-        st.write(equipamento_data)
+        
 
 
 
