@@ -1,0 +1,9 @@
+# Configuração da conexão com o banco de dados
+def get_connection():
+    connection_string = (
+        "DRIVER={ODBC Driver 17 for SQL Server};"
+        "SERVER=localhost;"
+        "DATABASE=printersNDD;"
+        "Trusted_Connection=yes;"
+    )
+    return pyodbc.connect(connection_string)

@@ -6,6 +6,7 @@ import streamlit as st
 import pyodbc
 import pandas as pd
 import plotly.express as px
+from io import BytesIO
 
 
 # Loading config file
@@ -21,15 +22,14 @@ authenticator = stauth.Authenticate(
     config['pre-authorized']
 )
 
-
-
 # Configuração da conexão com o banco de dados
 def get_connection():
     connection_string = (
         "DRIVER={ODBC Driver 17 for SQL Server};"
-        "SERVER=localhost;"
-        "DATABASE=printersNDD;"
-        "Trusted_Connection=yes;"
+        "SERVER=192.168.41.22;"
+        "DATABASE=Db_RPA;"
+        "UID=ndd_viewer;"
+        "PWD=ioas!@#ibusad$%$!@asd3;"
     )
     return pyodbc.connect(connection_string)
 
@@ -37,14 +37,14 @@ def fetch_data(query):
     try:
         connection = get_connection()
         data = pd.read_sql(query, connection)
-        connection.close()
+        #connection.close()
         return data
     except pyodbc.Error as e:
         st.error(f"Erro ao conectar ou executar a consulta: {e}")
         return None
 
 # Criação da interface Streamlit
-st.title("Consultar Linha Específica")
+st.title("Carregando informações...")
 
 # Entrada de dados do usuário
 
@@ -52,7 +52,7 @@ st.title("Consultar Linha Específica")
 def consulta(valor_id):
     if valor_id:
         # Criação da consulta SQL com base no valor fornecido
-        query = f"SELECT * FROM dbo.Sheet1$ WHERE EnterpriseID = {valor_id}"
+        query = f"SELECT * FROM [Db_RPA].[dbo].[vw_NDD] WHERE EnterpriseID = {valor_id}"
         data = fetch_data(query)
         if data is not None:
             #st.write(data)  ativar caso queira ver todos dados da base para esse cliente
@@ -107,7 +107,7 @@ def consulta(valor_id):
             
             # Usar layout de colunas do Streamlit
             
-            a4pbserie = equipamento_data.start_113.mean()
+            a4pbserie = equipamento_data.start_113.replace(0, pd.NA).mean()
             equipamento_data.start_112.fillna(0, inplace = True)
             a3pbserie = equipamento_data.start_112.astype(int).mean().astype(int)
             a4corserie = (equipamento_data.start_230 + equipamento_data.start_322)-equipamento_data.start_113
@@ -117,18 +117,21 @@ def consulta(valor_id):
             a3corserie = a3corserie.mean().astype(int)
             a3corserie = a3corserie if a3corserie > 0 else 0
 
+            # Lista de cores personalizadas (usando códigos hexadecimais ou nomes de cores)
+            cores = ['#1f77b4', '#ff7f0e']  # Azul e laranja, por exemplo
+
             col1, col2 = st.columns(2)
 
             with col1:
                 
 
-                pz1 = px.pie(names=('P&B', 'COR'), values=[a4pbserie,(a4corserie.mean() if a4corserie.mean() > 0 else 0)], title='Impressões A4')
+                pz1 = px.pie(names=('P&B', 'COR'), values=[a4pbserie,(a4corserie.mean() if a4corserie.mean() > 0 else 0)], title='Impressões A4', color_discrete_sequence=cores)
                 st.plotly_chart(pz1)
 
            
            # Exibir o gráfico na segunda coluna
             with col2:
-                pz2 = px.pie(names=('P&B', 'COR'), values=[a3pbserie,a3corserie], title='Impressões A3')
+                pz2 = px.pie(names=('P&B', 'COR'), values=[a3pbserie,a3corserie], title='Impressões A3', color_discrete_sequence=cores)
                 st.plotly_chart(pz2)
                 st.write(a3pbserie, a3corserie)
 
@@ -152,5 +155,16 @@ def consulta(valor_id):
       
     else:
         st.error("Por favor, digite um ID válido.")
+
+
+
+# Função para gerar um arquivo PDF (exemplo simples)
+def generate_pdf():
+    # Criação de um PDF fictício como exemplo
+    buffer = BytesIO()
+    buffer.write(b'PDF data: \n\n')
+    buffer.write(df.to_string(index=False).encode())
+    buffer.seek(0)
+    return buffer
 
             

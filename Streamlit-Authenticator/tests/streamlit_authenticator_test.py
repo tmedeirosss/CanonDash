@@ -11,9 +11,12 @@ from streamlit_authenticator.utilities.exceptions import (CredentialsError,
 import pyodbc
 import pandas as pd
 import app
+from io import BytesIO
 
 # Configurar o layout como 'wide'
 st.set_page_config(layout="wide")
+
+
 
 # Loading config file
 with open('../config.yaml', 'r', encoding='utf-8') as file:
@@ -43,7 +46,17 @@ if st.session_state["authentication_status"]:
     
     app.get_connection()
     app.consulta(client_id)
-
+    
+    
+    st.sidebar.title("Opções")
+    if st.sidebar.button("Imprimir"):
+        # Função para o botão de impressão - pode ser personalizada
+            st.sidebar.download_button(
+            label="Download PDF",
+            data=app.generate_pdf(),
+            file_name="dados_impressoras.pdf",
+            mime="application/pdf"
+        )
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
