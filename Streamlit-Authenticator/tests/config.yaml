@@ -1,0 +1,103 @@
+cookie:
+  expiry_days: 30
+  key: some_signature_key
+  name: some_cookie_name
+credentials:
+  usernames:
+    '26052':
+      email: tmedeiros5@cusa.canon.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Thiago
+      password: $2b$12$Kgb.Y6w7RK6kgIHxOZcaPu3.XnOIiz4iHzvrdKSLMLFT/H7rUfXxy
+      role: admin
+    '29863':
+      email: joazinho@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: joazinho
+      password: $2b$12$WAbJoMFPrWoKgq5O6ludnOE7B2TStejMWiHBWGfsY14j9sHryCZCC
+    '31102':
+      email: scannia@scannia.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Thiago
+      password: $2b$12$ekBPE7Ei2qRP1V5hE6nLtu1GENaX9UHucEIr8aEZComXXhNML/jly
+    '31415':
+      email: tmedeiros3@cusa.canon.com
+      failed_login_attempts: 0
+      logged_in: true
+      name: Thiago
+      password: $2b$12$zQAD139VMyaDr.m9idNSpexNn54stCw65H8bQbzSPCTc66QytCSby
+      role: admin
+    '32888':
+      email: tmedeiros4@cusa.canon.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Thiagooo
+      password: $2b$12$9WCL4TVMYwy2sP7tCGJbJeqGq5rPyy5gyFrye0bCLfhiK7Gb.EqVG
+    '56456567':
+      email: Thiago2024@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Thiagooooooo
+      password: $2b$12$Mqni4CaOJdQOUsr8N7YHUu3O7p2OSb4DnlOQXGzpzHDREzEiAQEJ.
+    '876562':
+      email: teste@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: maria
+      password: $2b$12$v7WFSKspMa589trO6c0eC.TA/hvgqdNIxJBX7iWwZIWgXGC.CtaGG
+    dbaldwin:
+      email: dbaldwin@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: David Baldwin
+      password: $2b$12$E9/bCaN/r8sN/FV2l8NpgOgspUBAp7UAVU6BgsXJzp/pW8gQWCprC
+    jsmith:
+      email: jsmith@gmail.com
+      failed_login_attempts: 0
+      logged_in: true
+      name: John Smith
+      password: $2b$12$iWlVOac3uujRvTrXDi6wructXftKmo/GyQd6SMu5FmyX306kH.yFO
+    rbriggs:
+      email: rbriggs@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Rebecca Briggs
+      password: $2b$12$uNaTgvGPG9rMbzOJHYaPQePw0DUfp1qHBrSq6l4O304qani6pKFpm
+    rcouper:
+      email: rcouper@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Ross Couper
+      password: $2b$12$Tir/PbHVmmnt5kgNxgOwMuxNIb2fv2pJ.q71TW8ekvbugCqkye4yu
+    tmedeiros:
+      email: tmedeiros@cusa.canon.com
+      failed_login_attempts: 2
+      logged_in: false
+      name: Thiago
+      password: $2b$12$bf4YVYIKGiMi8lRoVo3DY.GItB/RQ8atvR2nJrirjRjjkNKDoT9Py
+    tmedeiros2:
+      email: tmedeiros2@cusa.canon.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: Thiago
+      password: $2b$12$zeWt63ioZvknaagbMfdLcOoFb8e03DXCvb4U.w70RuwtBuqiV7nsS
+    wdewe:
+      email: wedw@ew.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: dwew
+      password: $2b$12$QJBPc7PxaTTBVJ.3cl4KlOPPqYCWVfaHqkk2IsoGDExXhihKZLDgy
+form_labels:
+  register:
+    email: "Endere\xE7o de Email"
+    name: Nome Completo
+    password: Senha
+    password_repeat: Repita a Senha
+    register_button: Registrar
+    username: "Nome de Usu\xE1rio"
+pre-authorized:
+  emails:
+  - melsby@gmail.com
