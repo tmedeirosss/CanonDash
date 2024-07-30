@@ -13,7 +13,12 @@ st.set_page_config(layout="wide")
 with open('../config.yaml', 'r', encoding='utf-8') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
-# Creating the authenticator object
+# Garantir que todos os usuários tenham o campo 'role'
+for username, user_info in config['credentials']['usernames'].items():
+    if 'role' not in user_info:
+        user_info['role'] = 'user'
+
+# Criar o objeto autenticador
 authenticator = stauth.Authenticate(
     config['credentials'],
     config['cookie']['name'],
@@ -63,7 +68,7 @@ def tipo_usuario(valor_id):
 
 # Manter os dados carregados no estado de sessão
 if 'data' not in st.session_state:
-    query = "SELECT * FROM [Db_RPA].[dbo].[vw_NDD]"
+    query = "SELECT EnterpriseName, ModelName, SerialNumber, pb_peq, pb_grande, cor_peq, cor_grande, cor_total, total, data FROM [Db_RPA].[dbo].[vw_NDD]"
     st.session_state.data = fetch_data(query)
 
 data = st.session_state.data
@@ -87,46 +92,55 @@ if st.session_state["authentication_status"]:
     
     # Utilize st.session_state para armazenar e manter os valores dos filtros
     if 'selected_enterprise' not in st.session_state:
-        st.session_state.selected_enterprise = None
+        st.session_state.selected_enterprise = "Todos"
     if 'selected_model' not in st.session_state:
-        st.session_state.selected_model = None
+        st.session_state.selected_model = "Todos"
     if 'selected_serial' not in st.session_state:
-        st.session_state.selected_serial = None
+        st.session_state.selected_serial = "Todos"
     if 'selected_date_range' not in st.session_state:
         st.session_state.selected_date_range = None
 
     # Primeiro filtro: Cliente
+    enterprise_options = ["Todos"] + list(data['EnterpriseName'].unique())
     st.session_state.selected_enterprise = st.sidebar.selectbox(
         "Selecione um cliente",
-        options=data['EnterpriseName'].unique(),
-        index=(list(data['EnterpriseName'].unique()).index(st.session_state.selected_enterprise)
-               if st.session_state.selected_enterprise in list(data['EnterpriseName'].unique()) else 0)
+        options=enterprise_options,
+        index=enterprise_options.index(st.session_state.selected_enterprise)
     )
     
     # Filtrar os modelos com base no cliente selecionado
-    filtered_data = data[data['EnterpriseName'] == st.session_state.selected_enterprise]
+    if st.session_state.selected_enterprise == "Todos":
+        filtered_data = data
+    else:
+        filtered_data = data[data['EnterpriseName'] == st.session_state.selected_enterprise]
     
     # Segundo filtro: Modelo
+    model_options = ["Todos"] + list(filtered_data['ModelName'].unique())
     st.session_state.selected_model = st.sidebar.selectbox(
         "Selecione um modelo de equipamento",
-        options=filtered_data['ModelName'].unique(),
-        index=(list(filtered_data['ModelName'].unique()).index(st.session_state.selected_model)
-               if st.session_state.selected_model in list(filtered_data['ModelName'].unique()) else 0)
+        options=model_options,
+        index=model_options.index(st.session_state.selected_model)
     )
     
     # Filtrar os números de série com base no modelo selecionado
-    filtered_data = filtered_data[filtered_data['ModelName'] == st.session_state.selected_model]
+    if st.session_state.selected_model == "Todos":
+        filtered_data = filtered_data
+    else:
+        filtered_data = filtered_data[filtered_data['ModelName'] == st.session_state.selected_model]
     
     # Terceiro filtro: Número de Série
+    serial_options = ["Todos"] + list(filtered_data['SerialNumber'].unique())
     st.session_state.selected_serial = st.sidebar.selectbox(
         "Selecione um número de série",
-        options=filtered_data['SerialNumber'].unique(),
-        index=(list(filtered_data['SerialNumber'].unique()).index(st.session_state.selected_serial)
-               if st.session_state.selected_serial in list(filtered_data['SerialNumber'].unique()) else 0)
+        options=serial_options,
+        index=serial_options.index(st.session_state.selected_serial)
     )
 
     # Filtrar com base no número de série selecionado
-    filtered_data = filtered_data[filtered_data['SerialNumber'] == st.session_state.selected_serial]
+    if st.session_state.selected_serial == "Todos":
+        filtered_data = filtered_data
+    else:
+        filtered_data = filtered_data[filtered_data['SerialNumber'] == st.session_state.selected_serial]
 
     # Quarto filtro: Período de Datas
     min_date = min(filtered_data['data'])
@@ -154,7 +168,9 @@ if st.session_state["authentication_status"] is None or st.session_state["authen
     try:
         (email_of_registered_user, username_of_registered_user, name_of_registered_user) = authenticator.register_user(pre_authorization=False)
         if email_of_registered_user:
-            st.success('User registered successfully')
+            client_code = st.text_input("Por favor, insira o código do cliente:")
+            if client_code:
+                st.success('User registered successfully')
     except RegisterError as e:
         st.error(e)
 
