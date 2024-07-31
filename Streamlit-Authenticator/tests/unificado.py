@@ -232,11 +232,13 @@ if st.session_state["authentication_status"]:
                 st.session_state.selected_date_range = None
 
             # Primeiro filtro: Cliente
-            enterprise_options = ["Todos"] + list(data['EnterpriseName'].unique())
+            enterprise_names = data[data['EnterpriseID'] == config['credentials']['usernames'][client_id]['client_code']]['EnterpriseName']
+            enterprise_options = list(enterprise_names.unique())  # Convertendo para lista depois de aplicar .unique()
+
             st.session_state.selected_enterprise = st.sidebar.selectbox(
-                "Selecione um cliente",
-                options=enterprise_options,
-                index=enterprise_options.index(st.session_state.selected_enterprise)
+            "Selecione um cliente",
+            options=enterprise_options,
+            index=enterprise_options.index(st.session_state.selected_enterprise) if st.session_state.selected_enterprise in enterprise_options else 0
             )
             
             # Filtrar os modelos com base no cliente selecionado
