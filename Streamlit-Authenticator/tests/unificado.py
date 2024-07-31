@@ -9,7 +9,7 @@ import pandas as pd
 # Configurar o layout como 'wide'
 st.set_page_config(layout="wide")
 
-# Loading config file
+# Carregar arquivo de configuração
 with open('../config.yaml', 'r', encoding='utf-8') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
@@ -24,7 +24,7 @@ authenticator = stauth.Authenticate(
     config['cookie']['name'],
     config['cookie']['key'],
     config['cookie']['expiry_days'],
-    config['pre-authorized'],
+    config.get('pre-authorized', {}),
     config['credentials']['usernames']
 )
 
@@ -68,7 +68,7 @@ def tipo_usuario(valor_id):
 
 # Manter os dados carregados no estado de sessão
 if 'data' not in st.session_state:
-    query = "SELECT EnterpriseName, ModelName, SerialNumber, pb_peq, pb_grande, cor_peq, cor_grande, cor_total, total, data FROM [Db_RPA].[dbo].[vw_NDD]"
+    query = "SELECT EnterpriseID, EnterpriseName, ModelName, SerialNumber, pb_peq, pb_grande, cor_peq, cor_grande, cor_total, total, data FROM [Db_RPA].[dbo].[vw_NDD]"
     st.session_state.data = fetch_data(query)
 
 data = st.session_state.data
@@ -84,80 +84,111 @@ if st.session_state["authentication_status"]:
     st.write(f'Seu ID de cliente é:  *{st.session_state["username"]}*')
     client_id = st.session_state["username"]
 
-    tipo_usuario(st.session_state["username"])
-    
-    st.write("Dados carregados com sucesso.")
-    
-    st.sidebar.title("Opções")
-    
-    # Utilize st.session_state para armazenar e manter os valores dos filtros
-    if 'selected_enterprise' not in st.session_state:
-        st.session_state.selected_enterprise = "Todos"
-    if 'selected_model' not in st.session_state:
-        st.session_state.selected_model = "Todos"
-    if 'selected_serial' not in st.session_state:
-        st.session_state.selected_serial = "Todos"
-    if 'selected_date_range' not in st.session_state:
-        st.session_state.selected_date_range = None
+    # Verificar se o código do cliente está presente
+    client_info = config['credentials']['usernames'][client_id]
+    if 'client_code' not in client_info or not client_info['client_code']:
+        st.warning("Por favor, insira o código do cliente para continuar.")
+        client_code_input = st.text_input("Insira o código do cliente:")
+        if st.button("Salvar Código do Cliente"):
+            config['credentials']['usernames'][client_id]['client_code'] = client_code_input
 
-    # Primeiro filtro: Cliente
-    enterprise_options = ["Todos"] + list(data['EnterpriseName'].unique())
-    st.session_state.selected_enterprise = st.sidebar.selectbox(
-        "Selecione um cliente",
-        options=enterprise_options,
-        index=enterprise_options.index(st.session_state.selected_enterprise)
-    )
-    
-    # Filtrar os modelos com base no cliente selecionado
-    if st.session_state.selected_enterprise == "Todos":
-        filtered_data = data
+            # Salvar as informações atualizadas no arquivo YAML
+            with open('../config.yaml', 'w', encoding='utf-8') as file:
+                yaml.dump(config, file, default_flow_style=False)
+            
+            st.success("Código do cliente atualizado com sucesso.")
+            st.experimental_rerun()
     else:
-        filtered_data = data[data['EnterpriseName'] == st.session_state.selected_enterprise]
-    
-    # Segundo filtro: Modelo
-    model_options = ["Todos"] + list(filtered_data['ModelName'].unique())
-    st.session_state.selected_model = st.sidebar.selectbox(
-        "Selecione um modelo de equipamento",
-        options=model_options,
-        index=model_options.index(st.session_state.selected_model)
-    )
-    
-    # Filtrar os números de série com base no modelo selecionado
-    if st.session_state.selected_model == "Todos":
-        filtered_data = filtered_data
-    else:
-        filtered_data = filtered_data[filtered_data['ModelName'] == st.session_state.selected_model]
-    
-    # Terceiro filtro: Número de Série
-    serial_options = ["Todos"] + list(filtered_data['SerialNumber'].unique())
-    st.session_state.selected_serial = st.sidebar.selectbox(
-        "Selecione um número de série",
-        options=serial_options,
-        index=serial_options.index(st.session_state.selected_serial)
-    )
+        tipo_usuario(client_id)
+        st.write("Dados carregados com sucesso.")
+        
+        st.sidebar.title("Opções")
 
-    # Filtrar com base no número de série selecionado
-    if st.session_state.selected_serial == "Todos":
-        filtered_data = filtered_data
-    else:
-        filtered_data = filtered_data[filtered_data['SerialNumber'] == st.session_state.selected_serial]
+        # Campo de entrada para o código do cliente na barra lateral
+        st.sidebar.header("Atualizar Código do Cliente")
+        client_code_input = st.sidebar.text_input(
+            "Insira o código do cliente (se necessário):",
+            value=config['credentials']['usernames'][client_id].get('client_code', "")
+        )
 
-    # Quarto filtro: Período de Datas
-    min_date = min(filtered_data['data'])
-    max_date = max(filtered_data['data'])
+        if st.sidebar.button("Salvar Código do Cliente"):
+            # Atualizar a configuração do cliente
+            config['credentials']['usernames'][client_id]['client_code'] = client_code_input
 
-    st.session_state.selected_date_range = st.sidebar.date_input(
-        "Selecione um período",
-        value=(min_date, max_date),
-        min_value=min_date,
-        max_value=max_date
-    )
+            # Salvar as informações atualizadas no arquivo YAML
+            with open('../config.yaml', 'w', encoding='utf-8') as file:
+                yaml.dump(config, file, default_flow_style=False)
+            
+            st.sidebar.success("Código do cliente atualizado com sucesso.")
 
-    # Filtrar os dados com base no período de datas selecionado
-    start_date, end_date = st.session_state.selected_date_range
-    df_selection = filtered_data[(filtered_data['data'] >= start_date) & (filtered_data['data'] <= end_date)]
+        # Utilize st.session_state para armazenar e manter os valores dos filtros
+        if 'selected_enterprise' not in st.session_state:
+            st.session_state.selected_enterprise = "Todos"
+        if 'selected_model' not in st.session_state:
+            st.session_state.selected_model = "Todos"
+        if 'selected_serial' not in st.session_state:
+            st.session_state.selected_serial = "Todos"
+        if 'selected_date_range' not in st.session_state:
+            st.session_state.selected_date_range = None
 
-    st.dataframe(df_selection)
+        # Primeiro filtro: Cliente
+        enterprise_options = ["Todos"] + list(data['EnterpriseName'].unique())
+        st.session_state.selected_enterprise = st.sidebar.selectbox(
+            "Selecione um cliente",
+            options=enterprise_options,
+            index=enterprise_options.index(st.session_state.selected_enterprise)
+        )
+        
+        # Filtrar os modelos com base no cliente selecionado
+        if st.session_state.selected_enterprise == "Todos":
+            filtered_data = data
+        else:
+            filtered_data = data[data['EnterpriseName'] == st.session_state.selected_enterprise]
+        
+        # Segundo filtro: Modelo
+        model_options = ["Todos"] + list(filtered_data['ModelName'].unique())
+        st.session_state.selected_model = st.sidebar.selectbox(
+            "Selecione um modelo de equipamento",
+            options=model_options,
+            index=model_options.index(st.session_state.selected_model)
+        )
+        
+        # Filtrar os números de série com base no modelo selecionado
+        if st.session_state.selected_model == "Todos":
+            filtered_data = filtered_data
+        else:
+            filtered_data = filtered_data[filtered_data['ModelName'] == st.session_state.selected_model]
+        
+        # Terceiro filtro: Número de Série
+        serial_options = ["Todos"] + list(filtered_data['SerialNumber'].unique())
+        st.session_state.selected_serial = st.sidebar.selectbox(
+            "Selecione um número de série",
+            options=serial_options,
+            index=serial_options.index(st.session_state.selected_serial)
+        )
+
+        # Filtrar com base no número de série selecionado
+        if st.session_state.selected_serial == "Todos":
+            filtered_data = filtered_data
+        else:
+            filtered_data = filtered_data[filtered_data['SerialNumber'] == st.session_state.selected_serial]
+
+        # Quarto filtro: Período de Datas
+        min_date = min(filtered_data['data'])
+        max_date = max(filtered_data['data'])
+
+        st.session_state.selected_date_range = st.sidebar.date_input(
+            "Selecione um período",
+            value=(min_date, max_date),
+            min_value=min_date,
+            max_value=max_date
+        )
+
+        # Filtrar os dados com base no período de datas selecionado
+        start_date, end_date = st.session_state.selected_date_range
+        df_selection = filtered_data[(filtered_data['data'] >= start_date) & (filtered_data['data'] <= end_date)]
+
+        st.dataframe(df_selection)
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
@@ -168,9 +199,7 @@ if st.session_state["authentication_status"] is None or st.session_state["authen
     try:
         (email_of_registered_user, username_of_registered_user, name_of_registered_user) = authenticator.register_user(pre_authorization=False)
         if email_of_registered_user:
-            client_code = st.text_input("Por favor, insira o código do cliente:")
-            if client_code:
-                st.success('User registered successfully')
+            st.success('User registered successfully')
     except RegisterError as e:
         st.error(e)
 
@@ -199,6 +228,6 @@ if st.session_state["authentication_status"] is None or st.session_state["authen
         except UpdateError as e:
             st.error(e)
 
-# Saving config file
+# Salvar as informações atualizadas no arquivo YAML
 with open('../config.yaml', 'w', encoding='utf-8') as file:
     yaml.dump(config, file, default_flow_style=False)
