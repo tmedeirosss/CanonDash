@@ -100,7 +100,7 @@ except LoginError as e:
 if st.session_state["authentication_status"]:
     authenticator.logout()
     st.write(f'Bem vindo *{st.session_state["name"]}*')
-    st.write(f'Seu ID de cliente é: *{st.session_state["username"]}*')
+    st.write('Esse é o seu Dashboard')
     client_id = st.session_state["username"]
 
     # Verificar se o código do cliente está presente
@@ -229,7 +229,9 @@ if st.session_state["authentication_status"]:
             st.sidebar.header("Atualizar Código do Cliente")
             client_code_input_encrypted = st.sidebar.text_input(
                 "Insira o código do cliente (se necessário):",
-                value=config['credentials']['usernames'][client_id].get('client_code', "")
+                value=config['credentials']['usernames'][client_id].get('client_code', ""),
+                type='password',
+                help="Caso seja necessário atualizar seu código de cliente, um novo será fornecido pela Canon"
             )
             
             
