@@ -5,6 +5,8 @@ import streamlit_authenticator as stauth
 from streamlit_authenticator.utilities.exceptions import (CredentialsError, ForgotError, LoginError, RegisterError, ResetError, UpdateError)
 import pyodbc
 import pandas as pd
+from cryptography.fernet import Fernet
+
 
 # Configurar o layout como 'wide'
 st.set_page_config(layout="wide")
@@ -65,6 +67,22 @@ def tipo_usuario(valor_id):
     user = config['credentials']['usernames']
     role = user[valor_id].get('role', 'user')
     return role
+
+def encrypt_number(number: str) -> str:
+    key = open('secret.key', 'rb').read()
+    cipher_suite = Fernet(key)
+    encrypted_number = cipher_suite.encrypt(number.encode())
+    return encrypted_number.decode()
+
+
+def decrypt_code(encrypted_code: str) -> str:
+    key = open('secret.key', 'rb').read()
+    cipher_suite = Fernet(key)
+    try:
+        decrypted_number = cipher_suite.decrypt(encrypted_code.encode())
+        return decrypted_number.decode()
+    except InvalidToken:
+        return "Código inválido ou chave incorreta"
     
 # Manter os dados carregados no estado de sessão
 if 'data' not in st.session_state:
@@ -72,6 +90,7 @@ if 'data' not in st.session_state:
     st.session_state.data = fetch_data(query)
 
 data = st.session_state.data
+
 
 try:
     authenticator.login()
@@ -89,8 +108,9 @@ if st.session_state["authentication_status"]:
     if 'client_code' not in client_info or not client_info['client_code']:
         st.warning("Por favor, insira o código do cliente para continuar.")
         client_code_input = st.text_input("Insira o código do cliente:")
+        client_code_input_decript = decrypt_code(client_code_input)
         if st.button("Salvar Código do Cliente"):
-            client_code = int(client_code_input)
+            client_code = int(client_code_input_decript)
             if (client_code) in data['EnterpriseID'].values:
                 config['credentials']['usernames'][client_id]['client_code'] = client_code
 
@@ -121,8 +141,9 @@ if st.session_state["authentication_status"]:
             )
 
             if st.sidebar.button("Salvar Código do Cliente"):
+                client_code_input = decrypt_code(client_code_input)
                 # Atualizar a configuração do cliente
-                config['credentials']['usernames'][client_id]['client_code'] = client_code_input
+                config['credentials']['usernames'][client_id]['client_code'] = int(client_code_input)
 
                 # Salvar as informações atualizadas no arquivo YAML
                 with open('../config.yaml', 'w', encoding='utf-8') as file:
@@ -206,14 +227,18 @@ if st.session_state["authentication_status"]:
 
             # Campo de entrada para o código do cliente na barra lateral
             st.sidebar.header("Atualizar Código do Cliente")
-            client_code_input = st.sidebar.text_input(
+            client_code_input_encrypted = st.sidebar.text_input(
                 "Insira o código do cliente (se necessário):",
                 value=config['credentials']['usernames'][client_id].get('client_code', "")
             )
-
+            
+            
             if st.sidebar.button("Salvar Código do Cliente"):
                 # Atualizar a configuração do cliente
-                config['credentials']['usernames'][client_id]['client_code'] = client_code_input
+                client_code_input_decript = decrypt_code(client_code_input_encrypted)
+                
+                st.write(client_code_input_decript)
+                config['credentials']['usernames'][client_id]['client_code'] = int(client_code_input_decript)
 
                 # Salvar as informações atualizadas no arquivo YAML
                 with open('../config.yaml', 'w', encoding='utf-8') as file:

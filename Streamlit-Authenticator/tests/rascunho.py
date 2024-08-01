@@ -49,3 +49,11 @@
             st.error("Nenhum dado foi retornado.")
     else:
         st.error("Por favor, digite um ID válido.")
+
+
+
+
+if st.sidebar.button("Salvar Código do Cliente"):
+                client_code_input = decrypt_code(client_code_input)
+                # Atualizar a configuração do cliente
+                config['credentials']['usernames'][client_id]['client_code'] = int(client_code_input)
