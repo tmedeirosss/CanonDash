@@ -6,10 +6,26 @@ from streamlit_authenticator.utilities.exceptions import (CredentialsError, Forg
 import pyodbc
 import pandas as pd
 from cryptography.fernet import Fernet
+from PIL import Image
+import time
 
 
 # Configurar o layout como 'wide'
 st.set_page_config(layout="wide")
+
+# Carregar a imagem
+image_path = "Canon-Logo.png"
+image = Image.open(image_path)
+
+# Redimensionar a imagem
+new_size = (225, 150)  # (width, height)
+resized_image = image.resize(new_size)
+
+# Exibir a imagem redimensionada
+st.image(resized_image)
+
+# Título estilizado usando HTML e CSS
+
 
 # Carregar arquivo de configuração
 with open('../config.yaml', 'r', encoding='utf-8') as file:
@@ -89,6 +105,7 @@ if 'data' not in st.session_state:
     query = "SELECT EnterpriseID, EnterpriseName, ModelName, SerialNumber, pb_peq, pb_grande, cor_peq, cor_grande, cor_total, total, data FROM [Db_RPA].[dbo].[vw_NDD]"
     st.session_state.data = fetch_data(query)
 
+admin_code = 8236274157823465
 data = st.session_state.data
 
 
@@ -111,7 +128,7 @@ if st.session_state["authentication_status"]:
         client_code_input_decript = decrypt_code(client_code_input)
         if st.button("Salvar Código do Cliente"):
             client_code = int(client_code_input_decript)
-            if (client_code) in data['EnterpriseID'].values:
+            if client_code in data['EnterpriseID'].values or client_code == admin_code:
                 config['credentials']['usernames'][client_id]['client_code'] = client_code
 
                 # Salvar as informações atualizadas no arquivo YAML
@@ -137,7 +154,9 @@ if st.session_state["authentication_status"]:
             st.sidebar.header("Atualizar Código do Cliente")
             client_code_input = st.sidebar.text_input(
                 "Insira o código do cliente (se necessário):",
-                value=config['credentials']['usernames'][client_id].get('client_code', "")
+                value=config['credentials']['usernames'][client_id].get('client_code', ""),
+                type='password',
+                help="Caso seja necessário atualizar seu código de cliente, um novo será fornecido pela Canon"
             )
 
             if st.sidebar.button("Salvar Código do Cliente"):

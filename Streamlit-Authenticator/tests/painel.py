@@ -5,6 +5,34 @@ from cryptography.fernet import Fernet, InvalidToken
 import pyodbc
 import pandas as pd
 import streamlit_authenticator as stauth
+import os
+from PIL import Image
+import time
+
+# Configurar o layout como 'wide'
+st.set_page_config(layout="wide")
+
+# Carregar a imagem
+image_path = "Canon-Logo.png"
+image = Image.open(image_path)
+
+# Redimensionar a imagem
+new_size = (225, 150)  # (width, height)
+resized_image = image.resize(new_size)
+
+# Exibir a imagem redimensionada
+st.image(resized_image)
+
+st.markdown("""
+    <style>
+    .title {
+        font-family: 'Comic Sans MS', cursive, sans-serif;
+        font-size: 48px;
+        color: #ffffff;
+    }
+    </style>
+    <h1 class="title">Painel de Administrador</h1>
+    """, unsafe_allow_html=True)
 
 # Funções de criptografia e descriptografia
 def encrypt_number(number: str) -> str:
@@ -22,24 +50,28 @@ def decrypt_code(encrypted_code: str) -> str:
     except InvalidToken:
         return "Código inválido ou chave incorreta"
 
-# Configuração da conexão ao banco de dados
-server = '192.168.41.22'  # Nome ou IP do servidor
-database = 'Db_RPA'  # Nome do banco de dados
-username = 'ndd_viewer'  # Nome de usuário
-password = 'ioas!@#ibusad$%$!@asd3'  # Senha
-connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
+with st.spinner("Carregando..."):
+    
+    # Configuração da conexão ao banco de dados
+    server = '192.168.41.22'  # Nome ou IP do servidor
+    database = 'Db_RPA'  # Nome do banco de dados
+    username = 'ndd_viewer'  # Nome de usuário
+    password = 'ioas!@#ibusad$%$!@asd3'  # Senha
+    connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
 
-# Conectando ao banco de dados
-connection = pyodbc.connect(connection_string)
+    # Conectando ao banco de dados
+    connection = pyodbc.connect(connection_string)
 
-# Consulta SQL
-query = 'SELECT EnterpriseName, EnterpriseID FROM [Db_RPA].[dbo].[vw_NDD]'
+    # Consulta SQL
+    query = 'SELECT EnterpriseName, EnterpriseID FROM [Db_RPA].[dbo].[vw_NDD]'
 
-# Carregar dados no DataFrame do pandas
-df = pd.read_sql(query, connection)
+    # Carregar dados no DataFrame do pandas
+    df = pd.read_sql(query, connection)
 
-# Fechar a conexão
-connection.close()
+    # Fechar a conexão
+    connection.close()
+
+    time.sleep(1)
 
 # Inicializar o estado para a seleção se não estiver definido
 if 'selected_option' not in st.session_state:
@@ -63,7 +95,7 @@ empresa_selecionada = st.selectbox(
 # Exibir a seleção atual
 st.write(f'Seleção atual: {empresa_selecionada}')
 
-if st.button("Clique para gerar o código do cliente"):
+if st.button("Gerar código do cliente"):
     # Filtra o DataFrame para obter o EnterpriseID
     enterprise_id = df[df['EnterpriseName'] == empresa_selecionada]['EnterpriseID']
     
@@ -93,11 +125,63 @@ if st.session_state.enterprise_id is not None:
         )
 else:
     st.write("Nenhum código de cliente gerado ainda.")
-    
-# Input para testar a descriptografia
-#testar_codigo = st.text_input('Digite o código criptografado para testar a descriptografia: ')
 
-# Descriptografia do código
-#if testar_codigo:
-#    codigo_decriptografado = decrypt_code(testar_codigo)
-#    st.write(f"Código descriptografado: {codigo_decriptografado}")
+# Funções para manipular o arquivo YAML
+def load_config(file_path):
+    with open(file_path, 'r') as file:
+        config = yaml.load(file, Loader=yaml.SafeLoader)
+    return config
+
+def save_config(file_path, config):
+    with open(file_path, 'w') as file:
+        yaml.dump(config, file)
+
+def update_user_role(file_path, username, new_role):
+    config = load_config(file_path)
+    if username in config['credentials']['usernames']:
+        config['credentials']['usernames'][username]['role'] = new_role
+        save_config(file_path, config)
+        st.write(f"Papel do usuário {username} atualizado para {new_role}.")
+    else:
+        st.write(f"Usuário {username} não encontrado.")
+
+# Caminho para o arquivo de configuração
+file_path = '../config.yaml'
+
+# Carregar a configuração
+config = load_config(file_path)
+
+# Obter os nomes dos usuários existentes
+usernames = list(config['credentials']['usernames'].keys())
+
+# Selectbox para selecionar o usuário
+username = st.selectbox('Selecione um usuário para atualizar o papel:', usernames)
+
+# Selectbox para selecionar o novo papel
+new_role = st.selectbox('Escolha o novo papel para o usuário:', ['admin', 'user'])
+
+# Container para os botões
+buttons_container = st.container()
+
+with buttons_container:
+    col1, col2 = st.columns(2)
+
+    with col1:
+        if st.button("Atualizar papel do usuário"):
+            if username and new_role:
+                update_user_role(file_path, username, new_role)
+            else:
+                st.write("Por favor, preencha todos os campos.")
+    
+    with col2:
+        if st.button("Gerar código de administrador"):
+            numero_para_criptografar = "8236274157823465"
+            numero_criptografado = encrypt_number(numero_para_criptografar)
+            st.write(f"Código de administrador: {numero_criptografado}")
+            st.download_button(
+                label="Gerar arquivo",
+                data=numero_criptografado,
+                file_name='codigo_administrador.txt',
+                mime='text/plain'
+        )
+        
