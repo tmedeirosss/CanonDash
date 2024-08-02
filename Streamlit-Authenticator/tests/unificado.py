@@ -7,7 +7,7 @@ import pyodbc
 import pandas as pd
 from cryptography.fernet import Fernet
 from PIL import Image
-import time
+import plotly.express as px
 
 
 # Configurar o layout como 'wide'
@@ -183,7 +183,7 @@ if st.session_state["authentication_status"]:
             # Primeiro filtro: Cliente
             enterprise_options = ["Todos"] + list(data['EnterpriseName'].unique())
             st.session_state.selected_enterprise = st.sidebar.selectbox(
-                "Selecione um cliente",
+                "Selecione o nome da empresa",
                 options=enterprise_options,
                 index=enterprise_options.index(st.session_state.selected_enterprise)
             )
@@ -239,6 +239,7 @@ if st.session_state["authentication_status"]:
 
             st.dataframe(df_selection)
 
+
         else:  #Bloco de dashboard do cliente
             st.write('Você possui acesso somente as suas informações')
 
@@ -282,7 +283,7 @@ if st.session_state["authentication_status"]:
             enterprise_options = list(enterprise_names.unique())  # Convertendo para lista depois de aplicar .unique()
 
             st.session_state.selected_enterprise = st.sidebar.selectbox(
-            "Selecione um cliente",
+            "Selecione o nome da empresa",
             options=enterprise_options,
             index=enterprise_options.index(st.session_state.selected_enterprise) if st.session_state.selected_enterprise in enterprise_options else 0
             )
@@ -335,6 +336,28 @@ if st.session_state["authentication_status"]:
             # Filtrar os dados com base no período de datas selecionado
             start_date, end_date = st.session_state.selected_date_range
             df_selection = filtered_data[(filtered_data['data'] >= start_date) & (filtered_data['data'] <= end_date)]
+
+
+            #Início do blobo de gráficos
+            A4Pb = df_selection['pb_peq'].sum()
+            A4Cor = df_selection['cor_peq'].sum()
+            A3Pb = df_selection['pb_grande'].sum()
+            A3Cor = df_selection['cor_grande'].sum()
+            total = df_selection['total'].sum()
+            equipamentos = df_selection['SerialNumber']
+            cores = ['#1f77b4', '#ff7f0e']
+            col1, col2 = st.columns(2)
+
+            bar1 = px.bar(df_selection, y='total', x='SerialNumber', title='Total por Equipamento')
+            st.plotly_chart(bar1)
+            
+            with col1:
+                pz1 = px.pie(names=('P&B', 'COR'), values=[A4Pb, A4Cor], title='Impressões A4', color_discrete_sequence=cores)
+                st.plotly_chart(pz1)
+
+            with col2:
+                pz2 = px.pie(names=('P&B', 'COR'), values=[A3Pb, A3Cor], title='Impressões A3', color_discrete_sequence=cores)
+                st.plotly_chart(pz2)
 
             st.dataframe(df_selection)
 
