@@ -346,10 +346,14 @@ if st.session_state["authentication_status"]:
             total = df_selection['total'].sum()
             equipamentos = df_selection['SerialNumber']
             cores = ['#1f77b4', '#ff7f0e']
+            st.title("Total por formato/cor")
             col1, col2 = st.columns(2)
 
-            bar1 = px.bar(df_selection, y='total', x='SerialNumber', title='Total por Equipamento')
+            
+            st.title("Total por equipamento")
+            bar1 = px.bar(df_selection, y='total', x='SerialNumber', title='Total por Equipamento', color='SerialNumber')
             st.plotly_chart(bar1)
+            
             
             with col1:
                 pz1 = px.pie(names=('P&B', 'COR'), values=[A4Pb, A4Cor], title='Impressões A4', color_discrete_sequence=cores)
@@ -359,7 +363,72 @@ if st.session_state["authentication_status"]:
                 pz2 = px.pie(names=('P&B', 'COR'), values=[A3Pb, A3Cor], title='Impressões A3', color_discrete_sequence=cores)
                 st.plotly_chart(pz2)
 
-            st.dataframe(df_selection)
+                 # Gráfico de Linha do Tempo
+            st.title("Produção Total ao Longo do Tempo")
+            timeline_data = filtered_data.groupby('data')['total'].sum().reset_index()
+            line_chart = px.line(
+                timeline_data,
+                x='data',
+                y='total',
+                title='Produção Total ao Longo do Tempo'
+            )
+            st.plotly_chart(line_chart)
+            
+            resumo = df_selection.groupby(df_selection['SerialNumber']).agg({
+            'pb_peq': 'sum',
+            'pb_grande': 'sum',
+            'cor_peq': 'sum',
+            'cor_grande': 'sum',
+            'total': 'sum'
+             }).reset_index()
+
+            
+            # Renomeia as colunas do dataframe
+            resumo = resumo.rename(columns={
+                'SerialNumber': 'Equipamento',
+                'pb_peq': 'P&B A4',
+                'pb_grande': 'P&B A3',
+                'cor_peq': 'COR A4',
+                'cor_grande': 'COR A3',
+                'total': 'TOTAL'
+            })
+
+            st.title("Resumo da Produção por Equipamento")
+            st.dataframe(resumo, hide_index=True)
+
+            resumo_total ={ 'P&B A4':df_selection['pb_peq'].sum(), 
+                           'P&B A3':df_selection['pb_grande'].sum(), 
+                           'COR A4':df_selection['cor_peq'].sum(), 
+                           'COR A3':df_selection['cor_grande'].sum(), 
+                           'TOTAL':df_selection['total'].sum()}
+            
+            st.title("Resumo da Produção Total") 
+            st.dataframe(resumo_total)
+
+            # Rodapé com HTML e CSS
+            footer = """
+            <style>
+            .footer {
+                position: fixed;
+                left: 0;
+                bottom: 0;
+                width: 100%;
+                background-color: #f1f1f1;
+                text-align: center;
+                padding: 3px;
+                font-size: 14px;
+                color: #555;
+                height: 30px;  /* Ajusta a altura do rodapé */
+            }
+            </style>
+            <div class="footer">
+                <p>© 2024 Canon do Brasil. Todos os direitos reservados.</p>
+            </div>
+            """
+
+            st.markdown(footer, unsafe_allow_html=True)
+
+            #st.dataframe(df_selection)
             
 
 
