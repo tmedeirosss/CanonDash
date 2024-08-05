@@ -25,14 +25,13 @@ st.image(resized_image)
 
 st.markdown("""
     <style>
-    .title {
-        font-family: 'Comic Sans MS', cursive, sans-serif;
-        font-size: 48px;
-        color: #ffffff;
-    }
+        .custom-title {
+            font-size: 30px; /* Altere o tamanho da fonte conforme necessário */
+            color: #333; /* Altere a cor do texto, se desejado */
+        }
     </style>
-    <h1 class="title">Painel de Administrador</h1>
-    """, unsafe_allow_html=True)
+    <h1 class="custom-title">Painel de Administrador</h1>
+""", unsafe_allow_html=True)
 
 # Funções de criptografia e descriptografia
 def encrypt_number(number: str) -> str:
@@ -141,7 +140,7 @@ def update_user_role(file_path, username, new_role):
     if username in config['credentials']['usernames']:
         config['credentials']['usernames'][username]['role'] = new_role
         save_config(file_path, config)
-        st.write(f"Papel do usuário {username} atualizado para {new_role}.")
+        st.write(f"Permissão do usuário {username} atualizado para {new_role}.")
     else:
         st.write(f"Usuário {username} não encontrado.")
 
@@ -155,10 +154,10 @@ config = load_config(file_path)
 usernames = list(config['credentials']['usernames'].keys())
 
 # Selectbox para selecionar o usuário
-username = st.selectbox('Selecione um usuário para atualizar o papel:', usernames)
+username = st.selectbox('Selecione um usuário para atualizar a permissão:', usernames)
 
-# Selectbox para selecionar o novo papel
-new_role = st.selectbox('Escolha o novo papel para o usuário:', ['admin', 'user'])
+# Selectbox para selecionar a nova permissão
+new_role = st.selectbox('Escolha a nova permissão para o usuário:', ['admin', 'user'])
 
 # Container para os botões
 buttons_container = st.container()
@@ -167,7 +166,7 @@ with buttons_container:
     col1, col2 = st.columns(2)
 
     with col1:
-        if st.button("Atualizar papel do usuário"):
+        if st.button("Atualizar permissão do usuário"):
             if username and new_role:
                 update_user_role(file_path, username, new_role)
             else:
@@ -184,4 +183,28 @@ with buttons_container:
                 file_name='codigo_administrador.txt',
                 mime='text/plain'
         )
-        
+
+# Rodapé com HTML e CSS
+footer = """
+<style>
+.footer {
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    background-color: #f1f1f1;
+    text-align: center;
+    padding: 3px;
+    font-size: 14px;
+    color: #555;
+    height: 30px;  /* Ajusta a altura do rodapé */
+}
+</style>
+<div class="footer">
+    <p>© 2024 Canon do Brasil. Todos os direitos reservados.</p>
+</div>
+"""
+
+st.markdown(footer, unsafe_allow_html=True)
+
+#st.dataframe(df_selection)

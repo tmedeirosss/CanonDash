@@ -31,6 +31,8 @@ st.image(resized_image)
 with open('../config.yaml', 'r', encoding='utf-8') as file:
     config = yaml.load(file, Loader=SafeLoader)
 
+
+
 # Garantir que todos os usuários tenham o campo 'role'
 for username, user_info in config['credentials']['usernames'].items():
     if 'role' not in user_info:
@@ -110,12 +112,17 @@ data = st.session_state.data
 
 
 try:
-    authenticator.login()
+    authenticator.login(fields={
+        'Form name': 'Entrar no Sistema',
+        'Username': 'Nome de Usuário',
+        'Password': 'Senha',
+        'Login': 'Entrar'
+    })
 except LoginError as e:
     st.error(e)
 
 if st.session_state["authentication_status"]:
-    authenticator.logout()
+    authenticator.logout(button_name= 'Sair')
     st.write(f'Bem vindo *{st.session_state["name"]}*')
     st.write('Esse é o seu Dashboard')
     client_id = st.session_state["username"]
@@ -435,31 +442,49 @@ if st.session_state["authentication_status"]:
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
 elif st.session_state["authentication_status"] is None:
-    st.warning('Please enter your username and password')
+    st.warning('Por favor, insira seu nome de usuário e senha')
 
 if st.session_state["authentication_status"] is None or st.session_state["authentication_status"] is False:
     try:
-        (email_of_registered_user, username_of_registered_user, name_of_registered_user) = authenticator.register_user(pre_authorization=False)
+        (email_of_registered_user, username_of_registered_user, name_of_registered_user) = authenticator.register_user(fields={
+            
+        'Form name': 'Novo Usuário',
+        'Name': 'Nome Completo',
+        'Email':'Email',
+        'Username': 'Nome de Usuário',
+        'Password': 'Senha',
+        'Repeat password': 'Repita a Senha',
+        'Register': 'Registrar',
+    
+        },pre_authorization=False)
         if email_of_registered_user:
-            st.success('User registered successfully')
+            st.success('Usuário registrado com sucesso!')
     except RegisterError as e:
         st.error(e)
 
     try:
-        (username_of_forgotten_password, email_of_forgotten_password, new_random_password) = authenticator.forgot_password()
+        (username_of_forgotten_password, email_of_forgotten_password, new_random_password) = authenticator.forgot_password(fields={
+            'Form name': 'Esqueci a senha',
+            'Username': 'Usuário',
+            'Submit': 'Recuperar',
+        })
         if username_of_forgotten_password:
-            st.success('New password sent securely')
+            st.success('Nova senha enviada')
         elif not username_of_forgotten_password:
-            st.error('Username not found')
+            st.error('Nome de usuário não localizado')
     except ForgotError as e:
         st.error(e)
 
     try:
-        (username_of_forgotten_username, email_of_forgotten_username) = authenticator.forgot_username()
+        (username_of_forgotten_username, email_of_forgotten_username) = authenticator.forgot_username(fields={
+            'Form name': 'Esqueci o Usuário',
+            'Email': 'Email',
+            'Submit': 'Recuperar',
+        })
         if username_of_forgotten_username:
-            st.success('Username sent securely')
+            st.success('Nome de usuário enviado')
         elif not username_of_forgotten_username:
-            st.error('Email not found')
+            st.error('Email não localizado')
     except ForgotError as e:
         st.error(e)
 
