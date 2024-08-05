@@ -360,6 +360,8 @@ if st.session_state["authentication_status"]:
                 st.plotly_chart(pz2)
 
             st.dataframe(df_selection)
+            
+
 
 elif st.session_state["authentication_status"] is False:
     st.error('Username/password is incorrect')
