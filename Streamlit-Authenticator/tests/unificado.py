@@ -8,7 +8,7 @@ import pandas as pd
 from cryptography.fernet import Fernet
 from PIL import Image
 import plotly.express as px
-
+import plotly.graph_objects as go
 
 # Configurar o layout como 'wide'
 st.set_page_config(layout="wide")
@@ -340,6 +340,12 @@ if st.session_state["authentication_status"]:
                 max_value=max_date
             )
 
+            formatted_start_date = min_date.strftime('%d/%m/%Y')
+            formatted_end_date = max_date.strftime('%d/%m/%Y')
+
+            # Exibir o intervalo de datas formatado
+            st.sidebar.write("Período selecionado:", formatted_start_date, "-", formatted_end_date)
+
             # Filtrar os dados com base no período de datas selecionado
             start_date, end_date = st.session_state.selected_date_range
             df_selection = filtered_data[(filtered_data['data'] >= start_date) & (filtered_data['data'] <= end_date)]
@@ -370,16 +376,39 @@ if st.session_state["authentication_status"]:
                 pz2 = px.pie(names=('P&B', 'COR'), values=[A3Pb, A3Cor], title='Impressões A3', color_discrete_sequence=cores)
                 st.plotly_chart(pz2)
 
-                 # Gráfico de Linha do Tempo
+            # Criar novas colunas para a produção colorida e PB
+            filtered_data['Producao_Cor'] = filtered_data['cor_peq'] + filtered_data['cor_grande']
+            filtered_data['Producao_PB'] = filtered_data['pb_peq'] + filtered_data['pb_grande']
+            
+
+            timeline_data_cor = filtered_data.groupby('data')['Producao_Cor'].sum().reset_index()
+            timeline_data_pb = filtered_data.groupby('data')['Producao_PB'].sum().reset_index()
+            
+
+
+            timeline_data = pd.merge(timeline_data_cor, timeline_data_pb, on='data', suffixes=('_Cor', '_PB'))
+
+
+            # Agora, vamos criar o gráfico de linha com duas linhas, uma para 'Producao_Cor' e outra para 'Producao_PB'
+            st.title("Produção P&B X Colorido ao Longo do Tempo")
+            fig = px.line(timeline_data, x='data', y=['Producao_Cor', 'Producao_PB'], 
+                        labels={'value': 'Produção', 'data': 'Data'}, 
+                        title='Produção ao Longo do Tempo')
+
+            # Exibindo o gráfico
+            st.plotly_chart(fig)
+
+            #Gráfico de linha do tempo por total
             st.title("Produção Total ao Longo do Tempo")
-            timeline_data = filtered_data.groupby('data')['total'].sum().reset_index()
-            line_chart = px.line(
-                timeline_data,
+            timeline_data_total = filtered_data.groupby('data')['total'].sum().reset_index()
+            line_chart_total = px.line(
+                timeline_data_total,
                 x='data',
                 y='total',
                 title='Produção Total ao Longo do Tempo'
             )
-            st.plotly_chart(line_chart)
+            st.plotly_chart(line_chart_total)
+
             
             resumo = df_selection.groupby(df_selection['SerialNumber']).agg({
             'pb_peq': 'sum',
