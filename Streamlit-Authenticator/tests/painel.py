@@ -180,7 +180,7 @@ with buttons_container:
             st.download_button(
                 label="Gerar arquivo",
                 data=numero_criptografado,
-                file_name='codigo_administrador.txt',
+                file_name='codigo_administrador',
                 mime='text/plain'
         )
 

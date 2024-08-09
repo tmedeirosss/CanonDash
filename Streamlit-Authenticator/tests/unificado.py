@@ -351,7 +351,7 @@ if st.session_state["authentication_status"]:
             df_selection = filtered_data[(filtered_data['data'] >= start_date) & (filtered_data['data'] <= end_date)]
 
 
-            #Início do blobo de gráficos
+            #Início do bloco de gráficos
             A4Pb = df_selection['pb_peq'].sum()
             A4Cor = df_selection['cor_peq'].sum()
             A3Pb = df_selection['pb_grande'].sum()
@@ -372,9 +372,10 @@ if st.session_state["authentication_status"]:
                 pz1 = px.pie(names=('P&B', 'COR'), values=[A4Pb, A4Cor], title='Impressões A4', color_discrete_sequence=cores)
                 st.plotly_chart(pz1)
 
-            with col2:
-                pz2 = px.pie(names=('P&B', 'COR'), values=[A3Pb, A3Cor], title='Impressões A3', color_discrete_sequence=cores)
-                st.plotly_chart(pz2)
+            if A3Pb != 0 or A3Cor != 0:
+                with col2:
+                    pz2 = px.pie(names=('P&B', 'COR'), values=[A3Pb, A3Cor], title='Impressões A3', color_discrete_sequence=cores)
+                    st.plotly_chart(pz2)
 
             # Criar novas colunas para a produção colorida e PB
             filtered_data['Producao_Cor'] = filtered_data['cor_peq'] + filtered_data['cor_grande']
@@ -429,8 +430,13 @@ if st.session_state["authentication_status"]:
                 'total': 'TOTAL'
             })
 
+            cols_to_format = ['P&B A4', 'P&B A3', 'COR A4', 'COR A3', 'TOTAL']
+            resumo[cols_to_format] = resumo[cols_to_format].applymap(lambda x: f"{x:,}".replace(",", "."))
+
             st.title("Resumo da Produção por Equipamento")
-            st.dataframe(resumo, hide_index=True)
+            resumo = resumo.reset_index(drop=True)
+            st.dataframe(resumo, hide_index= True)
+
 
             resumo_total ={ 'P&B A4':df_selection['pb_peq'].sum(), 
                            'P&B A3':df_selection['pb_grande'].sum(), 
@@ -438,8 +444,14 @@ if st.session_state["authentication_status"]:
                            'COR A3':df_selection['cor_grande'].sum(), 
                            'TOTAL':df_selection['total'].sum()}
             
+            df_resumo_total = pd.DataFrame(resumo_total, index=[0])
+
+            # Substituindo vírgulas por pontos na formatação dos números
+            df_resumo_total = df_resumo_total.applymap(lambda x: f"{x:,}".replace(",", "."))
+            
             st.title("Resumo da Produção Total") 
-            st.dataframe(resumo_total)
+            df_resumo_total = df_resumo_total.reset_index(drop=True)
+            st.dataframe(df_resumo_total, hide_index= True)
 
             # Rodapé com HTML e CSS
             footer = """
