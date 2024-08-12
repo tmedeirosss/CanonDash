@@ -8,7 +8,9 @@ import pandas as pd
 from cryptography.fernet import Fernet
 from PIL import Image
 import plotly.express as px
-import plotly.graph_objects as go
+import streamlit.components.v1 as components
+import io
+import time
 
 # Configurar o layout como 'wide'
 st.set_page_config(layout="wide")
@@ -102,6 +104,7 @@ def decrypt_code(encrypted_code: str) -> str:
     except InvalidToken:
         return "Código inválido ou chave incorreta"
     
+
 # Manter os dados carregados no estado de sessão
 if 'data' not in st.session_state:
     query = "SELECT EnterpriseID, EnterpriseName, ModelName, SerialNumber, pb_peq, pb_grande, cor_peq, cor_grande, cor_total, total, data FROM [Db_RPA].[dbo].[vw_NDD]"
@@ -131,9 +134,15 @@ if st.session_state["authentication_status"]:
     client_info = config['credentials']['usernames'][client_id]
     if 'client_code' not in client_info or not client_info['client_code']:
         st.warning("Por favor, insira o código do cliente para continuar.")
-        client_code_input = st.text_input("Insira o código do cliente:")
+        arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="hidden", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
+        if not arquivo_carregado:
+            st.warning('Por favor insira a chave de acesso')
+            st.stop()
+        st.success("Chave adicionada com sucesso!")
+                   
+        client_code_input = arquivo_carregado.read().decode("utf-8")
         client_code_input_decript = decrypt_code(client_code_input)
-        if st.button("Salvar Código do Cliente"):
+        if st.button("Salvar Chave de Acesso"):
             client_code = int(client_code_input_decript)
             if client_code in data['EnterpriseID'].values or client_code == admin_code:
                 config['credentials']['usernames'][client_id]['client_code'] = client_code
@@ -186,6 +195,9 @@ if st.session_state["authentication_status"]:
                 st.session_state.selected_serial = "Todos"
             if 'selected_date_range' not in st.session_state:
                 st.session_state.selected_date_range = None
+            
+            modo_grafico = st.sidebar.multiselect(label="Selecione Gráficos Desejados", options=["Gráficos do gerente", "Graficos do cliente"], default="Gráficos do gerente")
+            st.write(modo_grafico)
 
             # Primeiro filtro: Cliente
             enterprise_options = ["Todos"] + list(data['EnterpriseName'].unique())
@@ -244,9 +256,51 @@ if st.session_state["authentication_status"]:
             start_date, end_date = st.session_state.selected_date_range
             df_selection = filtered_data[(filtered_data['data'] >= start_date) & (filtered_data['data'] <= end_date)]
 
-            st.dataframe(df_selection)
+            #st.dataframe(df_selection) exibe todas colunas do dataframe filtrado
 
+            #Início do bloco de gráficos do administrador
 
+            gerente_container = st.container()
+            cliente_container = st.container()
+
+            if modo_grafico == ["Gráficos do gerente"]:
+                with gerente_container:
+
+                    df_selection['Número de Série - Cliente'] = df_selection['SerialNumber'] + " - " + df_selection['EnterpriseName']
+
+                    #Top 10 clientes que mais imprimiram
+                    df_grouped_EnterpriseName = df_selection.groupby('EnterpriseName', as_index=False).sum(numeric_only=True)
+                    st.title("Clientes que mais imprimiram")
+                    top_10 = df_grouped_EnterpriseName.nlargest(10, 'total')
+                    bar0 = px.bar(top_10, y='total', x='EnterpriseName', title='Top 10 clientes que mais imprimiram', color='EnterpriseName')
+                    st.plotly_chart(bar0)
+
+                    #Top 10 clientes que menos imprimiram
+                    df_grouped_EnterpriseName = df_selection.groupby('EnterpriseName', as_index=False).sum(numeric_only=True)
+                    st.title("Clientes que menos imprimiram")
+                    df_filtered_enterprise = df_grouped_EnterpriseName[df_grouped_EnterpriseName['total'] > 0]
+                    top_10 = df_filtered_enterprise.nsmallest(10, 'total')
+                    bar1 = px.bar(top_10, y='total', x='EnterpriseName', title='Top 10 clientes que menos imprimiram', color='EnterpriseName')
+                    st.plotly_chart(bar1)
+                    
+                    #Top 10 equipamentos que mais imprimiram
+                    df_grouped_total = df_selection.groupby('Número de Série - Cliente', as_index=False).sum(numeric_only=True)
+                    st.title("Equipamentos que mais imprimiram")
+                    top_10 = df_grouped_total.nlargest(10, 'total')
+                    bar2 = px.bar(top_10, y='total', x='Número de Série - Cliente', title='Top 10 equipamentos que mais imprimiram', color='Número de Série - Cliente')
+                    st.plotly_chart(bar2)
+
+                    #Top 10 equipamentos que menos imprimiram
+                    df_grouped_total = df_selection.groupby('Número de Série - Cliente', as_index=False).sum(numeric_only=True)
+                    df_filtered_serial = df_grouped_total[df_grouped_total['total'] > 0]
+                    st.title("Equipamentos que menos imprimiram")
+                    top_10 = df_filtered_serial.nsmallest(10, 'total')
+                    bar3 = px.bar(top_10, y='total', x='Número de Série - Cliente', title='Top 10 equipamentos que menos imprimiram', color='Número de Série - Cliente',  labels={
+                        "SerialNumber": "Número de Série - Cliente",
+                        "total": "Total Impresso"
+                    })
+                    st.plotly_chart(bar3)
+            
         else:  #Bloco de dashboard do cliente
             st.write('Você possui acesso somente as suas informações')
 

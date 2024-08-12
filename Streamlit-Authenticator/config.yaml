@@ -67,6 +67,21 @@ credentials:
       name: Thiago
       password: $2b$12$NFDYaJD0c4OmLx6S7KpWOe.NtAvI.l13hNvtegRi45fvUrh5ai2hy
       role: user
+    surf:
+      client_code: 30034
+      email: surf@gmail.com
+      logged_in: true
+      name: Thiago
+      password: $2b$12$L0A3BscExs9BAaJh4dVKKeB3JXh1nJ00B0BzyePOfc/MfUT9tCVaK
+      role: user
+    tadm:
+      client_code: 8236274157823465
+      email: tadm@gmail.com
+      failed_login_attempts: 0
+      logged_in: true
+      name: Thiago Adm
+      password: $2b$12$Cbms3mGVu5vzGVbzS4vopuvQx6hCnwJpMWsa6kOR/qU5uC9HNviiu
+      role: admin
     tauil:
       client_code: 31589
       email: taiul@gmail.com
