@@ -11,6 +11,13 @@ credentials:
       name: Thiago
       password: $2b$12$XPvBQQQ1p01payo4L4R8IOrUlumLIllTVGUJVi/q8XcCWId8aQ/gG
       role: admin
+    astrazenica:
+      client_code: 31604
+      email: astrazenica@gmail.com
+      logged_in: true
+      name: Thiago
+      password: $2b$12$t9S7RwXaXtZMsvxF2rUf1Oo3qa52djFF9sWhpfRatdRprrgkyqCgy
+      role: user
     dbaldwin:
       email: dbaldwin@gmail.com
       enterprise_code: null
