@@ -45,7 +45,7 @@ credentials:
     raia:
       client_code: 11283
       email: raia@gmail.com
-      failed_login_attempts: 0
+      failed_login_attempts: 1
       logged_in: true
       name: Thiago
       password: $2b$12$3kCu3SUYu5AuGkkwE8/AfeJLLnxI.sTioHL4xla04/rvx4u0YvFwe

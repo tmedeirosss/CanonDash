@@ -24,7 +24,7 @@ new_size = (225, 150)  # (width, height)
 resized_image = image.resize(new_size)
 
 # Exibir a imagem redimensionada
-st.image(resized_image)
+#st.image(resized_image)
 
 # Título estilizado usando HTML e CSS
 
@@ -163,7 +163,7 @@ if st.session_state["authentication_status"]:
 
             st.write("Dados carregados com sucesso.")
             
-            
+            st.sidebar.image(resized_image)
             st.sidebar.title("Opções")
 
             # Campo de entrada para o código do cliente na barra lateral
@@ -391,12 +391,15 @@ if st.session_state["authentication_status"]:
                         'cor_grande': 'COR A3',
                         'total': 'TOTAL'
                     })
+                    coluna_ignorada = 'Equipamento'
 
                     cols_to_format = ['P&B A4', 'P&B A3', 'COR A4', 'COR A3', 'TOTAL']
                     resumo[cols_to_format] = resumo[cols_to_format].applymap(lambda x: f"{x:,}".replace(",", "."))
 
                     st.title("Resumo da Produção por Equipamento")
                     resumo = resumo.reset_index(drop=True)
+                    resumo.update(resumo.loc[:, resumo.columns != coluna_ignorada].apply(pd.to_numeric, errors='coerce'))
+                    resumo = resumo.loc[:, (resumo != 0).any(axis=0)]
                     st.dataframe(resumo, hide_index= True)
 
 
@@ -413,12 +416,15 @@ if st.session_state["authentication_status"]:
                     
                     st.title("Resumo da Produção Total") 
                     df_resumo_total = df_resumo_total.reset_index(drop=True)
+                    df_resumo_total.update(df_resumo_total.loc[:, df_resumo_total.columns != coluna_ignorada].apply(pd.to_numeric, errors='coerce'))
+                    df_resumo_total = df_resumo_total.loc[:, (df_resumo_total != 0).any(axis=0)]
                     st.dataframe(df_resumo_total, hide_index= True)
 
 
         else:  #Bloco de dashboard do cliente
             st.write('Você possui acesso somente as suas informações')
 
+            st.sidebar.image(resized_image)
             st.sidebar.title("Opções")
 
             # Campo de entrada para o código do cliente na barra lateral
@@ -605,10 +611,12 @@ if st.session_state["authentication_status"]:
             cols_to_format = ['P&B A4', 'P&B A3', 'COR A4', 'COR A3', 'TOTAL']
             resumo[cols_to_format] = resumo[cols_to_format].applymap(lambda x: f"{x:,}".replace(",", "."))
 
+            coluna_ignorada = 'Equipamento'
             st.title("Resumo da Produção por Equipamento")
             resumo = resumo.reset_index(drop=True)
+            resumo.update(resumo.loc[:, resumo.columns != coluna_ignorada].apply(pd.to_numeric, errors='coerce'))
+            resumo = resumo.loc[:, (resumo != 0).any(axis=0)]
             st.dataframe(resumo, hide_index= True)
-
 
             resumo_total ={ 'P&B A4':df_selection['pb_peq'].sum(), 
                            'P&B A3':df_selection['pb_grande'].sum(), 
@@ -623,6 +631,8 @@ if st.session_state["authentication_status"]:
             
             st.title("Resumo da Produção Total") 
             df_resumo_total = df_resumo_total.reset_index(drop=True)
+            df_resumo_total.update(df_resumo_total.loc[:, df_resumo_total.columns != coluna_ignorada].apply(pd.to_numeric, errors='coerce'))
+            df_resumo_total = df_resumo_total.loc[:, (df_resumo_total != 0).any(axis=0)]
             st.dataframe(df_resumo_total, hide_index= True)
 
         # Rodapé com HTML e CSS
