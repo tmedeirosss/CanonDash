@@ -372,31 +372,36 @@ if st.session_state["authentication_status"]:
                     # Exibindo o gráfico
                     st.plotly_chart(fig)
 
-                    
                     resumo = df_selection.groupby(df_selection['SerialNumber']).agg({
+                    'ModelName': 'first',
                     'pb_peq': 'sum',
                     'pb_grande': 'sum',
                     'cor_peq': 'sum',
                     'cor_grande': 'sum',
                     'total': 'sum'
+                    
                     }).reset_index()
 
-                    
                     # Renomeia as colunas do dataframe
                     resumo = resumo.rename(columns={
-                        'SerialNumber': 'Equipamento',
+                        'ModelName': 'Modelo',
+                        'SerialNumber': 'Série',
                         'pb_peq': 'P&B A4',
                         'pb_grande': 'P&B A3',
                         'cor_peq': 'COR A4',
                         'cor_grande': 'COR A3',
                         'total': 'TOTAL'
                     })
-                    coluna_ignorada = 'Equipamento'
+                
+                    
+                    coluna_ignorada = 'Modelo', 'Série'
 
                     cols_to_format = ['P&B A4', 'P&B A3', 'COR A4', 'COR A3', 'TOTAL']
                     resumo[cols_to_format] = resumo[cols_to_format].applymap(lambda x: f"{x:,}".replace(",", "."))
 
                     st.title("Resumo da Produção por Equipamento")
+                    nova_ordem = ['Modelo','Série','P&B A4','COR A4','P&B A3','COR A3','TOTAL']
+                    resumo = resumo[nova_ordem]
                     resumo = resumo.reset_index(drop=True)
                     resumo.update(resumo.loc[:, resumo.columns != coluna_ignorada].apply(pd.to_numeric, errors='coerce'))
                     resumo = resumo.loc[:, (resumo != 0).any(axis=0)]
@@ -415,6 +420,8 @@ if st.session_state["authentication_status"]:
                     df_resumo_total = df_resumo_total.applymap(lambda x: f"{x:,}".replace(",", "."))
                     
                     st.title("Resumo da Produção Total") 
+                    nova_ordem = ['P&B A4','COR A4','P&B A3','COR A3','TOTAL']
+                    df_resumo_total=df_resumo_total[nova_ordem]
                     df_resumo_total = df_resumo_total.reset_index(drop=True)
                     df_resumo_total.update(df_resumo_total.loc[:, df_resumo_total.columns != coluna_ignorada].apply(pd.to_numeric, errors='coerce'))
                     df_resumo_total = df_resumo_total.loc[:, (df_resumo_total != 0).any(axis=0)]
@@ -590,39 +597,46 @@ if st.session_state["authentication_status"]:
             st.plotly_chart(fig)
           
             resumo = df_selection.groupby(df_selection['SerialNumber']).agg({
+            'ModelName': 'first',
             'pb_peq': 'sum',
             'pb_grande': 'sum',
             'cor_peq': 'sum',
             'cor_grande': 'sum',
             'total': 'sum'
-             }).reset_index()
-
             
+            }).reset_index()
+
             # Renomeia as colunas do dataframe
             resumo = resumo.rename(columns={
-                'SerialNumber': 'Equipamento',
+                'ModelName': 'Modelo',
+                'SerialNumber': 'Série',
                 'pb_peq': 'P&B A4',
                 'pb_grande': 'P&B A3',
                 'cor_peq': 'COR A4',
                 'cor_grande': 'COR A3',
                 'total': 'TOTAL'
             })
+        
+            
+            coluna_ignorada = 'Modelo', 'Série'
 
             cols_to_format = ['P&B A4', 'P&B A3', 'COR A4', 'COR A3', 'TOTAL']
             resumo[cols_to_format] = resumo[cols_to_format].applymap(lambda x: f"{x:,}".replace(",", "."))
 
-            coluna_ignorada = 'Equipamento'
             st.title("Resumo da Produção por Equipamento")
+            nova_ordem = ['Modelo','Série','P&B A4','COR A4','P&B A3','COR A3','TOTAL']
+            resumo = resumo[nova_ordem]
             resumo = resumo.reset_index(drop=True)
             resumo.update(resumo.loc[:, resumo.columns != coluna_ignorada].apply(pd.to_numeric, errors='coerce'))
             resumo = resumo.loc[:, (resumo != 0).any(axis=0)]
             st.dataframe(resumo, hide_index= True)
 
+
             resumo_total ={ 'P&B A4':df_selection['pb_peq'].sum(), 
-                           'P&B A3':df_selection['pb_grande'].sum(), 
-                           'COR A4':df_selection['cor_peq'].sum(), 
-                           'COR A3':df_selection['cor_grande'].sum(), 
-                           'TOTAL':df_selection['total'].sum()}
+                        'P&B A3':df_selection['pb_grande'].sum(), 
+                        'COR A4':df_selection['cor_peq'].sum(), 
+                        'COR A3':df_selection['cor_grande'].sum(), 
+                        'TOTAL':df_selection['total'].sum()}
             
             df_resumo_total = pd.DataFrame(resumo_total, index=[0])
 
@@ -630,6 +644,8 @@ if st.session_state["authentication_status"]:
             df_resumo_total = df_resumo_total.applymap(lambda x: f"{x:,}".replace(",", "."))
             
             st.title("Resumo da Produção Total") 
+            nova_ordem = ['P&B A4','COR A4','P&B A3','COR A3','TOTAL']
+            df_resumo_total=df_resumo_total[nova_ordem]
             df_resumo_total = df_resumo_total.reset_index(drop=True)
             df_resumo_total.update(df_resumo_total.loc[:, df_resumo_total.columns != coluna_ignorada].apply(pd.to_numeric, errors='coerce'))
             df_resumo_total = df_resumo_total.loc[:, (df_resumo_total != 0).any(axis=0)]
