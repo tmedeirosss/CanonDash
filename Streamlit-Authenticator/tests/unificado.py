@@ -12,7 +12,6 @@ import streamlit.components.v1 as components
 import io
 import time
 
-# Configurar o layout como 'wide'
 st.set_page_config(layout="wide")
 
 # Carregar a imagem
@@ -61,7 +60,7 @@ def get_connection():
             "PWD=ioas!@#ibusad$%$!@asd3;"
         )
         connection = pyodbc.connect(connection_string)
-        st.success("Conexão com o banco de dados estabelecida com sucesso.")
+        #st.success("Conexão com o banco de dados estabelecida com sucesso.")
         return connection
     except pyodbc.Error as e:
         st.error(f"Erro ao conectar ao banco de dados: {e}")
@@ -115,6 +114,7 @@ data = st.session_state.data
 
 
 try:
+    st.image(resized_image)
     authenticator.login(fields={
         'Form name': 'Entrar no Sistema',
         'Username': 'Nome de Usuário',
@@ -133,10 +133,10 @@ if st.session_state["authentication_status"]:
     # Verificar se o código do cliente está presente
     client_info = config['credentials']['usernames'][client_id]
     if 'client_code' not in client_info or not client_info['client_code']:
-        st.warning("Por favor, insira o código do cliente para continuar.")
-        arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="hidden", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
+        st.info("Clique no botão 'Browse files' para adicionar a chave de acesso.")
+        arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="collapsed", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
         if not arquivo_carregado:
-            st.warning('Por favor insira a chave de acesso')
+            st.warning('A chave de acesso garante a segurança de suas informações e será solicitada somente no primeiro acesso.')
             st.stop()
         st.success("Chave adicionada com sucesso!")
                    
@@ -164,28 +164,24 @@ if st.session_state["authentication_status"]:
             st.write("Dados carregados com sucesso.")
             
             st.sidebar.image(resized_image)
-            st.sidebar.title("Opções")
 
             # Campo de entrada para o código do cliente na barra lateral
-            st.sidebar.header("Atualizar Código do Cliente")
-            client_code_input = st.sidebar.text_input(
-                "Insira o código do cliente (se necessário):",
-                value=config['credentials']['usernames'][client_id].get('client_code', ""),
-                type='password',
-                help="Caso seja necessário atualizar seu código de cliente, um novo será fornecido pela Canon"
-            )
+            with st.sidebar.expander('🔒Atualizar chave de acesso'):
+                arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="collapsed", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
+                st.info('Carregue sua chave de acesso')
+                if arquivo_carregado:
+                    client_code_input = arquivo_carregado.read().decode("utf-8")
+                    if st.button("Salvar Chave de Acesso"):
+                        client_code_input = decrypt_code(client_code_input)
+                        # Atualizar a configuração do cliente
+                        config['credentials']['usernames'][client_id]['client_code'] = int(client_code_input)
 
-            if st.sidebar.button("Salvar Código do Cliente"):
-                client_code_input = decrypt_code(client_code_input)
-                # Atualizar a configuração do cliente
-                config['credentials']['usernames'][client_id]['client_code'] = int(client_code_input)
-
-                # Salvar as informações atualizadas no arquivo YAML
-                with open('../config.yaml', 'w', encoding='utf-8') as file:
-                    yaml.dump(config, file, default_flow_style=False)
-                
-                st.sidebar.success("Código do cliente atualizado com sucesso.")
-
+                        # Salvar as informações atualizadas no arquivo YAML
+                        with open('../config.yaml', 'w', encoding='utf-8') as file:
+                            yaml.dump(config, file, default_flow_style=False)
+                        
+                        st.sidebar.success("Código do cliente atualizado com sucesso.")
+            st.sidebar.title("Filtros")
             # Utilize st.session_state para armazenar e manter os valores dos filtros
             if 'selected_enterprise' not in st.session_state:
                 st.session_state.selected_enterprise = "Todos"
@@ -432,31 +428,25 @@ if st.session_state["authentication_status"]:
             st.write('Você possui acesso somente as suas informações')
 
             st.sidebar.image(resized_image)
-            st.sidebar.title("Opções")
+            
 
             # Campo de entrada para o código do cliente na barra lateral
-            st.sidebar.header("Atualizar Código do Cliente")
-            client_code_input_encrypted = st.sidebar.text_input(
-                "Insira o código do cliente (se necessário):",
-                value=config['credentials']['usernames'][client_id].get('client_code', ""),
-                type='password',
-                help="Caso seja necessário atualizar seu código de cliente, um novo será fornecido pela Canon"
-            )
-            
-            
-            if st.sidebar.button("Salvar Código do Cliente"):
-                # Atualizar a configuração do cliente
-                client_code_input_decript = decrypt_code(client_code_input_encrypted)
-                
-                st.write(client_code_input_decript)
-                config['credentials']['usernames'][client_id]['client_code'] = int(client_code_input_decript)
+            with st.sidebar.expander('🔒Atualizar chave de acesso'):
+                arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="collapsed", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
+                st.info('Carregue sua chave de acesso')
+                if arquivo_carregado:
+                    client_code_input = arquivo_carregado.read().decode("utf-8")
+                    if st.button("Salvar Chave de Acesso"):
+                        client_code_input = decrypt_code(client_code_input)
+                        # Atualizar a configuração do cliente
+                        config['credentials']['usernames'][client_id]['client_code'] = int(client_code_input)
 
-                # Salvar as informações atualizadas no arquivo YAML
-                with open('../config.yaml', 'w', encoding='utf-8') as file:
-                    yaml.dump(config, file, default_flow_style=False)
-                
-                st.sidebar.success("Código do cliente atualizado com sucesso.")
-
+                        # Salvar as informações atualizadas no arquivo YAML
+                        with open('../config.yaml', 'w', encoding='utf-8') as file:
+                            yaml.dump(config, file, default_flow_style=False)
+                        
+                        st.sidebar.success("Código do cliente atualizado com sucesso.")
+            st.sidebar.title("Filtros")
             # Utilize st.session_state para armazenar e manter os valores dos filtros
             if 'selected_enterprise' not in st.session_state:
                 st.session_state.selected_enterprise = "Todos"

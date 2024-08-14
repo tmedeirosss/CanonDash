@@ -4,6 +4,13 @@ cookie:
   name: some_cookie_name
 credentials:
   usernames:
+    administrador2:
+      client_code: 8236274157823465
+      email: administrador2@gmail.com
+      logged_in: true
+      name: Thiago
+      password: $2b$12$q2XO.jcGXUOT02Gz4F0/wu15KJnMr0prwVIPTct2IRaOYUSx5N9a6
+      role: admin
     administrator:
       client_code: 15622
       email: Thiagocanon@gmail.com
