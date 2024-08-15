@@ -1,0 +1,57 @@
+/* styles.css */
+.header {
+    background-color: #ffffff;
+    color: white;
+    padding: 0px;
+    margin-top: 0px;
+    margin-left: -20px;
+    text-align: center;
+    font-size: 24px;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed; /* Fixa o cabeçalho no topo da página */
+    top: 0; /* Alinha o cabeçalho ao topo */
+    width: 100%; /* Faz o cabeçalho ocupar a largura total da página */
+    height: 75px;
+    z-index: 1000; /* Garante que o cabeçalho fique acima de outros elementos */
+}
+
+.header img {
+    max-width: 200px; /* Define a largura máxima da imagem */
+    height: auto; /* Mantém a proporção da imagem */
+    margin-right: 0px; /* Espaço à direita da imagem */
+    margin-top: 20px;
+}
+.header .title {
+    flex-grow: 1; /* Faz com que o título ocupe o espaço restante */
+    text-align: left; /* Alinha o título à esquerda */
+}
+
+.content {
+    padding-top: 80px; /* Adiciona um espaçamento superior para evitar que o conteúdo fique escondido atrás do cabeçalho */
+}
+
+/* Ocultar a barra superior do Streamlit */
+header[data-testid="stHeader"] {
+    display: none;
+}
+
+
+/* Estiliza o botão de envio do formulário */
+.stButton button {
+    background-color: #cc0000; /* Cor de fundo */
+    color: white; /* Cor do texto */
+    padding: 10px 20px; /* Espaçamento interno */
+    border: none; /* Remove a borda padrão */
+    border-radius: 4px; /* Bordas arredondadas */
+    font-size: 16px; /* Tamanho da fonte */
+    cursor: pointer; /* Cursor de mão */
+    width: 10%; /* Largura total do botão */
+    margin-top: 20px; /* Espaço acima do botão */
+}
+
+.stButton button:hover {
+    background-color: #cc0000fa; /* Cor de fundo ao passar o mouse */
+}

@@ -11,21 +11,35 @@ import plotly.express as px
 import streamlit.components.v1 as components
 import io
 import time
+import base64
 
-st.set_page_config(layout="wide")
+st.set_page_config(
+    layout="wide",
+    page_title="Canon Dashboard",
+    page_icon=":star:",  # Você pode usar um ícone emoji ou uma URL de ícone
+    menu_items={  # Esvazia os itens do menu para ocultar a barra de deploy
+        'About': None
+    }
+)
 
-# Carregar a imagem
-image_path = "Canon-Logo.png"
-image = Image.open(image_path)
+def get_base64_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode()
+    
+logo_base64 = get_base64_image("Canon-Logo.png")
 
-# Redimensionar a imagem
-new_size = (225, 150)  # (width, height)
-resized_image = image.resize(new_size)
 
-# Exibir a imagem redimensionada
-#st.image(resized_image)
+with open('styles.css') as f:
+    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html= True)
 
-# Título estilizado usando HTML e CSS
+
+
+st.markdown(f'''
+    <div class="header">
+        <img src="data:image/png;base64,{logo_base64}" alt="Logo">
+    </div>
+''', unsafe_allow_html=True)
+
 
 
 # Carregar arquivo de configuração
@@ -114,7 +128,6 @@ data = st.session_state.data
 
 
 try:
-    st.image(resized_image)
     authenticator.login(fields={
         'Form name': 'Entrar no Sistema',
         'Username': 'Nome de Usuário',
@@ -163,7 +176,6 @@ if st.session_state["authentication_status"]:
 
             st.write("Dados carregados com sucesso.")
             
-            st.sidebar.image(resized_image)
 
             # Campo de entrada para o código do cliente na barra lateral
             with st.sidebar.expander('🔒Atualizar chave de acesso'):
@@ -254,6 +266,7 @@ if st.session_state["authentication_status"]:
                 max_value=max_date
             )
 
+
             # Filtrar os dados com base no período de datas selecionado
             # Verificar se a tupla tem dois elementos antes de desempacotá-la
             if len(st.session_state.selected_date_range) != 2:
@@ -264,6 +277,11 @@ if st.session_state["authentication_status"]:
 
             start_date, end_date = st.session_state.selected_date_range
             df_selection = filtered_data[(filtered_data['data'] >= start_date) & (filtered_data['data'] <= end_date)]
+            formatted_start_date = start_date.strftime('%d/%m/%Y')
+            formatted_end_date = end_date.strftime('%d/%m/%Y')
+
+            # Exibir o intervalo de datas formatado
+            st.sidebar.write("Período selecionado:", formatted_start_date, "-", formatted_end_date)
             #st.dataframe(df_selection) exibe todas colunas do dataframe filtrado
 
             #Início do bloco de gráficos do administrador
@@ -426,10 +444,7 @@ if st.session_state["authentication_status"]:
 
         else:  #Bloco de dashboard do cliente
             st.write('Você possui acesso somente as suas informações')
-
-            st.sidebar.image(resized_image)
             
-
             # Campo de entrada para o código do cliente na barra lateral
             with st.sidebar.expander('🔒Atualizar chave de acesso'):
                 arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="collapsed", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
@@ -512,11 +527,7 @@ if st.session_state["authentication_status"]:
                 max_value=max_date
             )
 
-            formatted_start_date = min_date.strftime('%d/%m/%Y')
-            formatted_end_date = max_date.strftime('%d/%m/%Y')
 
-            # Exibir o intervalo de datas formatado
-            st.sidebar.write("Período selecionado:", formatted_start_date, "-", formatted_end_date)
 
             # Filtrar os dados com base no período de datas selecionado
             if len(st.session_state.selected_date_range) != 2:
@@ -527,6 +538,11 @@ if st.session_state["authentication_status"]:
             start_date, end_date = st.session_state.selected_date_range
             df_selection = filtered_data[(filtered_data['data'] >= start_date) & (filtered_data['data'] <= end_date)]
 
+            formatted_start_date = start_date.strftime('%d/%m/%Y')
+            formatted_end_date = end_date.strftime('%d/%m/%Y')
+
+            # Exibir o intervalo de datas formatado
+            st.sidebar.write("Período selecionado:", formatted_start_date, "-", formatted_end_date)
 
             #Início do bloco de gráficos
             A4Pb = df_selection['pb_peq'].sum()
