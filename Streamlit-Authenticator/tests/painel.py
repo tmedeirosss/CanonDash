@@ -8,20 +8,37 @@ import streamlit_authenticator as stauth
 import os
 from PIL import Image
 import time
+import base64
 
-# Configurar o layout como 'wide'
-st.set_page_config(layout="wide")
+st.set_page_config(
+    layout="wide",
+    page_title="Canon Dashboard",
+    page_icon="Canon-Logo.png",  # Você pode usar um ícone emoji ou uma URL de ícone
+    menu_items={  # Esvazia os itens do menu para ocultar a barra de deploy
+        'About': None
+    }
+)
 
-# Carregar a imagem
-image_path = "Canon-Logo.png"
-image = Image.open(image_path)
+def get_base64_image(image_path):
+    with open(image_path, "rb") as image_file:
+        return base64.b64encode(image_file.read()).decode()
+    
+logo_base64 = get_base64_image("Canon-Logo.png")
 
-# Redimensionar a imagem
-new_size = (225, 150)  # (width, height)
-resized_image = image.resize(new_size)
 
-# Exibir a imagem redimensionada
-st.image(resized_image)
+with open('styles.css') as f:
+    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html= True)
+
+
+
+st.markdown(f'''
+    <div class="header">
+        <img src="data:image/png;base64,{logo_base64}" alt="Logo">
+    </div>
+''', unsafe_allow_html=True)
+
+
+
 
 st.markdown("""
     <style>

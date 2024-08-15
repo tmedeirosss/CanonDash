@@ -43,12 +43,12 @@ header[data-testid="stHeader"] {
 .stButton button {
     background-color: #cc0000; /* Cor de fundo */
     color: white; /* Cor do texto */
-    padding: 10px 20px; /* Espaçamento interno */
+    padding: 5px 10px; /* Espaçamento interno */
     border: none; /* Remove a borda padrão */
     border-radius: 4px; /* Bordas arredondadas */
     font-size: 16px; /* Tamanho da fonte */
     cursor: pointer; /* Cursor de mão */
-    width: 10%; /* Largura total do botão */
+    width: 31%; /* Largura total do botão */
     margin-top: 20px; /* Espaço acima do botão */
 }
 

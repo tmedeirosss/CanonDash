@@ -16,7 +16,7 @@ import base64
 st.set_page_config(
     layout="wide",
     page_title="Canon Dashboard",
-    page_icon=":star:",  # Você pode usar um ícone emoji ou uma URL de ícone
+    page_icon="Canon-Logo.png",  # Você pode usar um ícone emoji ou uma URL de ícone
     menu_items={  # Esvazia os itens do menu para ocultar a barra de deploy
         'About': None
     }
@@ -126,14 +126,18 @@ if 'data' not in st.session_state:
 admin_code = 8236274157823465
 data = st.session_state.data
 
+colpos1, colpos2, colpos3 = st.columns(3) #define colunas de posição
+
 
 try:
-    authenticator.login(fields={
-        'Form name': 'Entrar no Sistema',
-        'Username': 'Nome de Usuário',
-        'Password': 'Senha',
-        'Login': 'Entrar'
-    })
+    with colpos2:
+        authenticator.login(fields={
+            'Form name': 'Login',
+            'Username': 'Nome de Usuário',
+            'Password': 'Senha',
+            'Login': 'Entrar'
+        })
+        
 except LoginError as e:
     st.error(e)
 
@@ -685,53 +689,64 @@ if st.session_state["authentication_status"]:
 
 
 elif st.session_state["authentication_status"] is False:
-    st.error('Username/password is incorrect')
+    with colpos2:
+        st.error('Usuário/Senha incorreta')
 elif st.session_state["authentication_status"] is None:
-    st.warning('Por favor, insira seu nome de usuário e senha')
+    with colpos2:
+        st.warning('Por favor, insira seu nome de usuário e senha')
 
 if st.session_state["authentication_status"] is None or st.session_state["authentication_status"] is False:
     try:
-        (email_of_registered_user, username_of_registered_user, name_of_registered_user) = authenticator.register_user(fields={
+        with colpos2:
+            with st.expander('Criar uma conta'):
+                (email_of_registered_user, username_of_registered_user, name_of_registered_user) = authenticator.register_user(fields={
+                    
+                'Form name': 'Cadastrar',
+                'Name': 'Nome Completo',
+                'Email':'Email',
+                'Username': 'Nome de Usuário',
+                'Password': 'Senha',
+                'Repeat password': 'Repita a Senha',
+                'Register': 'Registrar',
             
-        'Form name': 'Novo Usuário',
-        'Name': 'Nome Completo',
-        'Email':'Email',
-        'Username': 'Nome de Usuário',
-        'Password': 'Senha',
-        'Repeat password': 'Repita a Senha',
-        'Register': 'Registrar',
-    
-        },pre_authorization=False)
-        if email_of_registered_user:
-            st.success('Usuário registrado com sucesso!')
+                },pre_authorization=False)
+                if email_of_registered_user:
+                    st.success('Usuário registrado com sucesso!')
     except RegisterError as e:
-        st.error(e)
+        with colpos2:
+            st.error(e)
 
     try:
-        (username_of_forgotten_password, email_of_forgotten_password, new_random_password) = authenticator.forgot_password(fields={
-            'Form name': 'Esqueci a senha',
-            'Username': 'Usuário',
-            'Submit': 'Recuperar',
-        })
-        if username_of_forgotten_password:
-            st.success('Nova senha enviada')
-        elif not username_of_forgotten_password:
-            st.error('Nome de usuário não localizado')
+        with colpos2:
+            with st.expander('Esqueceu a senha?'):
+                (username_of_forgotten_password, email_of_forgotten_password, new_random_password) = authenticator.forgot_password(fields={
+                    'Form name': 'Esqueci a senha',
+                    'Username': 'Usuário',
+                    'Submit': 'Recuperar',
+                })
+                if username_of_forgotten_password:
+                    st.success('Nova senha enviada')
+                elif not username_of_forgotten_password:
+                    st.error('Nome de usuário não localizado')
     except ForgotError as e:
-        st.error(e)
+        with colpos2:
+            st.error(e)
 
     try:
-        (username_of_forgotten_username, email_of_forgotten_username) = authenticator.forgot_username(fields={
-            'Form name': 'Esqueci o Usuário',
-            'Email': 'Email',
-            'Submit': 'Recuperar',
-        })
-        if username_of_forgotten_username:
-            st.success('Nome de usuário enviado')
-        elif not username_of_forgotten_username:
-            st.error('Email não localizado')
+        with colpos2:
+            with st.expander('Esqueceu o usuário?'):
+                (username_of_forgotten_username, email_of_forgotten_username) = authenticator.forgot_username(fields={
+                    'Form name': 'Esqueci o Usuário',
+                    'Email': 'Email',
+                    'Submit': 'Recuperar',
+                })
+                if username_of_forgotten_username:
+                    st.success('Nome de usuário enviado')
+                elif not username_of_forgotten_username:
+                    st.error('Email não localizado')
     except ForgotError as e:
-        st.error(e)
+        with colpos2:
+            st.error(e)
 
     if st.session_state["authentication_status"]:
         try:

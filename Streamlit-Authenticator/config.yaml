@@ -33,6 +33,14 @@ credentials:
       name: David Baldwin
       password: $2b$12$E9/bCaN/r8sN/FV2l8NpgOgspUBAp7UAVU6BgsXJzp/pW8gQWCprC
       role: user
+    fares:
+      client_code: 33887
+      email: fares@gmail.com
+      failed_login_attempts: 2
+      logged_in: false
+      name: Thiago
+      password: $2b$12$FcXUljpJYO2GofbYKvh6iuGoDgEy/Q60lrLofUWqoWkEHQrxX9p7a
+      role: user
     jsmith:
       email: jsmith@gmail.com
       enterprise_code: null
@@ -91,7 +99,7 @@ credentials:
     tadm:
       client_code: 8236274157823465
       email: tadm@gmail.com
-      failed_login_attempts: 0
+      failed_login_attempts: 3
       logged_in: true
       name: Thiago Adm
       password: $2b$12$Cbms3mGVu5vzGVbzS4vopuvQx6hCnwJpMWsa6kOR/qU5uC9HNviiu
