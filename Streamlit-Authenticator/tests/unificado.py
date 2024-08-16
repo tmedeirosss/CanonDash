@@ -12,6 +12,8 @@ import streamlit.components.v1 as components
 import io
 import time
 import base64
+import smtplib
+from email.mime.text import MIMEText
 
 st.set_page_config(
     layout="wide",
@@ -117,6 +119,19 @@ def decrypt_code(encrypted_code: str) -> str:
     except InvalidToken:
         return "Código inválido ou chave incorreta"
     
+def send_reset_email(email, nova_senha):
+    sender = "conectividadecanon@outlook.com"
+    password = "Canon@12345"
+
+    msg = MIMEText(f"Essa é sua nova senha: {nova_senha}")
+    msg["Subject"] = "Redefinição de senha"
+    msg["From"] = sender
+    msg["To"] = email
+
+    with smtplib.SMTP("smtp.office365.com", 587) as server:
+        server.starttls()  # Inicia a conexão segura TLS
+        server.login(sender, password)
+        server.sendmail(sender, email, msg.as_string())
 
 # Manter os dados carregados no estado de sessão
 if 'data' not in st.session_state:
@@ -144,7 +159,6 @@ except LoginError as e:
 if st.session_state["authentication_status"]:
     authenticator.logout(button_name= 'Sair')
     st.write(f'Bem vindo *{st.session_state["name"]}*')
-    st.write('Esse é o seu Dashboard')
     client_id = st.session_state["username"]
 
     # Verificar se o código do cliente está presente
@@ -197,6 +211,20 @@ if st.session_state["authentication_status"]:
                             yaml.dump(config, file, default_flow_style=False)
                         
                         st.sidebar.success("Código do cliente atualizado com sucesso.")
+            with st.sidebar.expander('Alterar Senha'):
+                if st.session_state['authentication_status']:
+                    try:
+                        if authenticator.reset_password(st.session_state['username'], fields= {'Form name':'Atualizar Senha', 
+                                                                                               'Current password':'Senha Atual', 
+                                                                                               'New password':'Nova Senha', 
+                                                                                               'Repeat password': 'Repita a Senha', 
+                                                                                               'Reset':'OK'}):
+                            # Salvar as informações atualizadas no arquivo YAML
+                            with open('../config.yaml', 'w', encoding='utf-8') as file:
+                                yaml.dump(config, file, default_flow_style=False)
+                            st.success('Senha alterada com sucesso!')
+                    except Exception as e:
+                        st.error(e)
             st.sidebar.title("Filtros")
             # Utilize st.session_state para armazenar e manter os valores dos filtros
             if 'selected_enterprise' not in st.session_state:
@@ -465,6 +493,21 @@ if st.session_state["authentication_status"]:
                             yaml.dump(config, file, default_flow_style=False)
                         
                         st.sidebar.success("Código do cliente atualizado com sucesso.")
+            with st.sidebar.expander('Alterar Senha'):
+                if st.session_state['authentication_status']:
+                    try:
+                        if authenticator.reset_password(st.session_state['username'], fields= {'Form name':'Atualizar Senha', 
+                                                                                               'Current password':'Senha Atual', 
+                                                                                               'New password':'Nova Senha', 
+                                                                                               'Repeat password': 'Repita a Senha', 
+                                                                                               'Reset':'OK'}):
+                            # Salvar as informações atualizadas no arquivo YAML
+                            with open('../config.yaml', 'w', encoding='utf-8') as file:
+                                yaml.dump(config, file, default_flow_style=False)
+                            st.success('Senha alterada com sucesso!')
+                    except Exception as e:
+                        st.error(e)
+            
             st.sidebar.title("Filtros")
             # Utilize st.session_state para armazenar e manter os valores dos filtros
             if 'selected_enterprise' not in st.session_state:
@@ -725,6 +768,11 @@ if st.session_state["authentication_status"] is None or st.session_state["authen
                     'Submit': 'Recuperar',
                 })
                 if username_of_forgotten_password:
+                    send_reset_email(email_of_forgotten_password, new_random_password)
+                    
+                    # Salvar as informações atualizadas no arquivo YAML
+                    with open('../config.yaml', 'w', encoding='utf-8') as file:
+                        yaml.dump(config, file, default_flow_style=False)
                     st.success('Nova senha enviada')
                 elif not username_of_forgotten_password:
                     st.error('Nome de usuário não localizado')
