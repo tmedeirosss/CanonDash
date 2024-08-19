@@ -111,7 +111,7 @@ empresa_selecionada = st.selectbox(
 # Exibir a seleção atual
 st.write(f'Seleção atual: {empresa_selecionada}')
 
-if st.button("Gerar código do cliente"):
+if st.button("Gerar chave de acesso"):
     # Filtra o DataFrame para obter o EnterpriseID
     enterprise_id = df[df['EnterpriseName'] == empresa_selecionada]['EnterpriseID']
     
@@ -130,13 +130,13 @@ if st.session_state.enterprise_id is not None:
     # Criptografia do código do cliente
     if codigo_cliente:
         codigo_criptografado = encrypt_number(codigo_cliente)
-        st.write(f"Código do cliente: {codigo_criptografado}")
+        st.write("Chave gerada com sucesso")
 
         # Adiciona um botão para baixar o código criptografado
         st.download_button(
-            label="Gerar arquivo",
+            label="Baixar Chave",
             data=codigo_criptografado,
-            file_name='codigo_cliente.txt',
+            file_name=f'Chave de Acesso{empresa_selecionada}',
             mime='text/plain'
         )
 else:
@@ -190,14 +190,14 @@ with buttons_container:
                 st.write("Por favor, preencha todos os campos.")
     
     with col2:
-        if st.button("Gerar código de administrador"):
+        if st.button("Gerar chave de administrador"):
             numero_para_criptografar = "8236274157823465"
             numero_criptografado = encrypt_number(numero_para_criptografar)
-            st.write(f"Código de administrador: {numero_criptografado}")
+            st.write(f"Código de administrador gerado com sucesso!")
             st.download_button(
-                label="Gerar arquivo",
+                label="Baixar Chave",
                 data=numero_criptografado,
-                file_name='codigo_administrador',
+                file_name='Chave de Administrador',
                 mime='text/plain'
         )
 

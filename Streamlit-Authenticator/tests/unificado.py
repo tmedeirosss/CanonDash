@@ -120,17 +120,15 @@ def decrypt_code(encrypted_code: str) -> str:
         return "Código inválido ou chave incorreta"
     
 def send_reset_email(email, nova_senha):
-    sender = "conectividadecanon@outlook.com"
-    password = "Canon@12345"
+    sender = "Canon_Dashboard@cusa.canon.com"
+    
 
     msg = MIMEText(f"Essa é sua nova senha: {nova_senha}")
     msg["Subject"] = "Redefinição de senha"
     msg["From"] = sender
     msg["To"] = email
 
-    with smtplib.SMTP("smtp.office365.com", 587) as server:
-        server.starttls()  # Inicia a conexão segura TLS
-        server.login(sender, password)
+    with smtplib.SMTP("Melville-app-mail.cusa.canon.com", 25) as server:
         server.sendmail(sender, email, msg.as_string())
 
 # Manter os dados carregados no estado de sessão
@@ -173,7 +171,7 @@ if st.session_state["authentication_status"]:
                    
         client_code_input = arquivo_carregado.read().decode("utf-8")
         client_code_input_decript = decrypt_code(client_code_input)
-        if st.button("Salvar Chave de Acesso"):
+        if st.button("Salvar"):
             client_code = int(client_code_input_decript)
             if client_code in data['EnterpriseID'].values or client_code == admin_code:
                 config['credentials']['usernames'][client_id]['client_code'] = client_code
@@ -196,12 +194,12 @@ if st.session_state["authentication_status"]:
             
 
             # Campo de entrada para o código do cliente na barra lateral
-            with st.sidebar.expander('🔒Atualizar chave de acesso'):
+            with st.sidebar.expander('Atualizar chave de acesso'):
                 arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="collapsed", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
                 st.info('Carregue sua chave de acesso')
                 if arquivo_carregado:
                     client_code_input = arquivo_carregado.read().decode("utf-8")
-                    if st.button("Salvar Chave de Acesso"):
+                    if st.button("Salvar"):
                         client_code_input = decrypt_code(client_code_input)
                         # Atualizar a configuração do cliente
                         config['credentials']['usernames'][client_id]['client_code'] = int(client_code_input)
@@ -236,9 +234,9 @@ if st.session_state["authentication_status"]:
             if 'selected_date_range' not in st.session_state:
                 st.session_state.selected_date_range = None
             
-            modo_grafico = st.sidebar.selectbox(label="Selecione Gráficos Desejados", options=["Gráficos do gerente", "Gráficos do cliente"], index = 0)
+            modo_grafico = st.sidebar.selectbox(label="Selecione Gráficos Desejados", options=["Gráfico Gerencial", "Gráfico Cliente"], index = 0)
             st.write(modo_grafico)
-            if modo_grafico == "Gráficos do cliente":
+            if modo_grafico == "Gráfico Cliente":
                 index_cliente = 1
             else:
                 index_cliente = 0
@@ -321,7 +319,7 @@ if st.session_state["authentication_status"]:
             gerente_container = st.container()
             cliente_container = st.container()
 
-            if modo_grafico == "Gráficos do gerente":
+            if modo_grafico == "Gráfico Gerencial":
                 with gerente_container:
 
                     df_selection['Número de Série - Cliente'] = df_selection['SerialNumber'] + " - " + df_selection['EnterpriseName']
@@ -358,7 +356,7 @@ if st.session_state["authentication_status"]:
                         "total": "Total Impresso"
                     })
                     st.plotly_chart(bar3)
-            elif modo_grafico == "Gráficos do cliente":
+            elif modo_grafico == "Gráfico Cliente":
                 with cliente_container:
                     #Início do bloco de gráficos
                     A4Pb = df_selection['pb_peq'].sum()
@@ -478,12 +476,12 @@ if st.session_state["authentication_status"]:
             st.write('Você possui acesso somente as suas informações')
             
             # Campo de entrada para o código do cliente na barra lateral
-            with st.sidebar.expander('🔒Atualizar chave de acesso'):
+            with st.sidebar.expander('Atualizar chave de acesso'):
                 arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="collapsed", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
                 st.info('Carregue sua chave de acesso')
                 if arquivo_carregado:
                     client_code_input = arquivo_carregado.read().decode("utf-8")
-                    if st.button("Salvar Chave de Acesso"):
+                    if st.button("Salvar"):
                         client_code_input = decrypt_code(client_code_input)
                         # Atualizar a configuração do cliente
                         config['credentials']['usernames'][client_id]['client_code'] = int(client_code_input)
