@@ -156,7 +156,11 @@ except LoginError as e:
 
 if st.session_state["authentication_status"]:
     authenticator.logout(button_name= 'Sair')
-    st.write(f'Bem vindo *{st.session_state["name"]}*')
+    if st.session_state["name"] is None:
+        st.write('Aguarde...')
+        st.stop()
+    else:
+        st.write(f'Bem vindo *{st.session_state["name"]}*')
     client_id = st.session_state["username"]
 
     # Verificar se o código do cliente está presente
