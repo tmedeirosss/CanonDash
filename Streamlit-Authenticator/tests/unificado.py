@@ -475,7 +475,10 @@ if st.session_state["authentication_status"]:
                     df_resumo_total = df_resumo_total.loc[:, (df_resumo_total != 0).any(axis=0)]
                     st.dataframe(df_resumo_total, hide_index= True)
 
-
+        
+        elif role == 'user' and str(config['credentials']['usernames'][client_id]['client_code']) == str(admin_code): 
+            st.warning('Contate o seu representante Canon')
+            st.stop()
         else:  #Bloco de dashboard do cliente
             st.write('Você possui acesso somente as suas informações')
             

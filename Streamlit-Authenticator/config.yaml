@@ -18,12 +18,28 @@ credentials:
       name: Thiago
       password: $2b$12$XPvBQQQ1p01payo4L4R8IOrUlumLIllTVGUJVi/q8XcCWId8aQ/gG
       role: admin
+    adminteste:
+      client_code: 8236274157823465
+      email: teste@gmail.com
+      failed_login_attempts: 1
+      logged_in: true
+      name: Admin Teste
+      password: $2b$12$n8mvOMXIFwU8MMNHOv63s.rp7H1pzSvmibBVZeeFzatjdyjYHf8y2
+      role: admin
+    adminteste2:
+      client_code: 8236274157823465
+      email: adminteste2@gmail.com
+      logged_in: true
+      name: admin teste dois
+      password: $2b$12$IGFK.JHRnSynbsmkYkipz.rgemQsI6QRQAey34RVbILiDpioY.b6u
+      role: admin
     astrazenica:
       client_code: 31604
       email: astrazenica@gmail.com
+      failed_login_attempts: 0
       logged_in: true
       name: Thiago
-      password: $2b$12$t9S7RwXaXtZMsvxF2rUf1Oo3qa52djFF9sWhpfRatdRprrgkyqCgy
+      password: $2b$12$UT8exZahWx2IEgi2CD4Uy.7070NS7lmGryGGKRwZ3cqclGJQUwSwG
       role: user
     dbaldwin:
       email: dbaldwin@gmail.com
@@ -98,11 +114,11 @@ credentials:
       role: user
     tadm:
       client_code: 8236274157823465
-      email: tadm@gmail.com
-      failed_login_attempts: 3
+      email: tmedeiros@cusa.canon.com
+      failed_login_attempts: 0
       logged_in: true
       name: Thiago Adm
-      password: $2b$12$Cbms3mGVu5vzGVbzS4vopuvQx6hCnwJpMWsa6kOR/qU5uC9HNviiu
+      password: $2b$12$urIEG/pk5CGYNd1aZ5/8Muakb3pOSY8NLKm8nFsl17.XE0CihV6RW
       role: admin
     tauil:
       client_code: 31589
@@ -111,6 +127,13 @@ credentials:
       logged_in: true
       name: Thiago
       password: $2b$12$nK5kHSn3h0JmsNWy2xfzQeDDNEoKs4caQfH082qFo4GvuPX0a7WfG
+      role: admin
+    thiagoteste:
+      client_code: 8236274157823465
+      email: emailteste@gmail.com
+      logged_in: true
+      name: Thiago
+      password: $2b$12$fq2u6.Y9cS2SwsvQc1gnW.SgUQsAkoIsU5zzWCHREZrkv8DeyIXSW
       role: admin
     tjdft:
       client_code: 33544
