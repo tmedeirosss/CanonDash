@@ -131,24 +131,30 @@ def send_reset_email(email, nova_senha):
     with smtplib.SMTP("Melville-app-mail.cusa.canon.com", 25) as server:
         server.sendmail(sender, email, msg.as_string())
 
+banco_de_origem = st.selectbox('Selecione o Banco de Dados de Origem', options=["NDD", "IwRemote"])
+
 # Manter os dados carregados no estado de sessão
 if 'data' not in st.session_state:
-    query = """
-    SELECT 
-    CHECKSUM([Ship To Name]) AS EnterpriseID,
-    [Ship To Name] AS EnterpriseName,
-    [Item Code] AS ModelName,
-    [Serial#] AS SerialNumber,
-    pb_peq,
-    pb_grande,
-    cor_peq,
-    cor_grande,
-    cor_total,
-    total,
-    data
-FROM 
-    [Db_RPA].[dbo].[vw_IW_Main]
-"""
+    if banco_de_origem == "NDD":
+        consulta= "SELECT EnterpriseID, EnterpriseName, ModelName, SerialNumber, pb_peq, pb_grande, cor_peq, cor_grande, cor_total, total, data FROM [Db_RPA].[dbo].[vw_NDD]"
+    elif banco_de_origem == "IwRemote":
+        consulta= """
+        SELECT 
+        [Ship To Name] AS EnterpriseID,
+        [Ship To Name] AS EnterpriseName,
+        [Item Code] AS ModelName,
+        [Serial#] AS SerialNumber,
+        pb_peq,
+        pb_grande,
+        cor_peq,
+        cor_grande,
+        cor_total,
+        total,
+        data
+    FROM 
+        [Db_RPA].[dbo].[vw_IW_Main]
+    """
+    query = consulta
     st.session_state.data = fetch_data(query)
 
 admin_code = 8236274157823465
@@ -191,18 +197,32 @@ if st.session_state["authentication_status"]:
         client_code_input = arquivo_carregado.read().decode("utf-8")
         client_code_input_decript = decrypt_code(client_code_input)
         if st.button("Salvar"):
-            client_code = int(client_code_input_decript)
-            if client_code in data['EnterpriseID'].values or client_code == admin_code:
-                config['credentials']['usernames'][client_id]['client_code'] = client_code
+            if banco_de_origem == "NDD":
+                client_code = int(client_code_input_decript)
+                if client_code in data['EnterpriseID'].values or client_code == admin_code:
+                    config['credentials']['usernames'][client_id]['client_code'] = client_code
 
-                # Salvar as informações atualizadas no arquivo YAML
-                with open('../config.yaml', 'w', encoding='utf-8') as file:
-                    yaml.dump(config, file, default_flow_style=False)
+                    # Salvar as informações atualizadas no arquivo YAML
+                    with open('../config.yaml', 'w', encoding='utf-8') as file:
+                        yaml.dump(config, file, default_flow_style=False)
 
-                st.success("Código do cliente atualizado com sucesso.")
-                st.experimental_rerun()
-            else:
-                st.error("Código do cliente não encontrado na base de dados.")
+                    st.success("Código do cliente atualizado com sucesso.")
+                    st.experimental_rerun()
+                else:
+                    st.error("Código do cliente não encontrado na base de dados.")
+            elif banco_de_origem == "IwRemote":
+                client_code = client_code_input_decript
+                if client_code in data['EnterpriseName'].values or client_code == admin_code:
+                    config['credentials']['usernames'][client_id]['client_code'] = client_code
+
+                    # Salvar as informações atualizadas no arquivo YAML
+                    with open('../config.yaml', 'w', encoding='utf-8') as file:
+                        yaml.dump(config, file, default_flow_style=False)
+
+                    st.success("Código do cliente atualizado com sucesso.")
+                    st.experimental_rerun()
+                else:
+                    st.error("Código do cliente não encontrado na base de dados.", client_code)
     else:
         # Código do cliente já está presente, verifique se está na base de dados
         tipo_usuario(client_id)

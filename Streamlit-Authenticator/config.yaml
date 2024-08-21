@@ -18,6 +18,13 @@ credentials:
       name: Thiago
       password: $2b$12$XPvBQQQ1p01payo4L4R8IOrUlumLIllTVGUJVi/q8XcCWId8aQ/gG
       role: admin
+    adminiw:
+      client_code: 8236274157823465
+      email: adminiw@gmail.com
+      logged_in: false
+      name: Adminiw
+      password: $2b$12$OiDunTSoJJ7dzYXjiFYjJOUrOPAO5u/4ZGBwhr3dkkWe5jUNYcfmK
+      role: user
     adminteste:
       client_code: 8236274157823465
       email: teste@gmail.com
@@ -150,6 +157,13 @@ credentials:
       name: usuario administrador
       password: $2b$12$KAsH453NhKve.8BZgbobOOYutyqa.58WHs9lS2ULmg6ENviHt75ZC
       role: admin
+    vitalprev:
+      client_code: VITALPREV ASSESSORIA EM MEDICINA OCUPACIONAL E PREVENTIVA LT
+      email: vitalprev@gmail.com
+      logged_in: true
+      name: vitalprev
+      password: $2b$12$KiXwb/jnQzhLAWF/ye9F0.PA1NQmEdflUj5iJbkrD5PdQAURD3apm
+      role: user
     wdewe:
       email: wedw@ew.com
       enterprise_code: null
