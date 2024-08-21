@@ -133,7 +133,22 @@ def send_reset_email(email, nova_senha):
 
 # Manter os dados carregados no estado de sessão
 if 'data' not in st.session_state:
-    query = "SELECT EnterpriseID, EnterpriseName, ModelName, SerialNumber, pb_peq, pb_grande, cor_peq, cor_grande, cor_total, total, data FROM [Db_RPA].[dbo].[vw_NDD]"
+    query = """
+    SELECT 
+    CHECKSUM([Ship To Name]) AS EnterpriseID,
+    [Ship To Name] AS EnterpriseName,
+    [Item Code] AS ModelName,
+    [Serial#] AS SerialNumber,
+    pb_peq,
+    pb_grande,
+    cor_peq,
+    cor_grande,
+    cor_total,
+    total,
+    data
+FROM 
+    [Db_RPA].[dbo].[vw_IW_Main]
+"""
     st.session_state.data = fetch_data(query)
 
 admin_code = 8236274157823465
