@@ -128,6 +128,13 @@ credentials:
       name: Thiago
       password: $2b$12$nK5kHSn3h0JmsNWy2xfzQeDDNEoKs4caQfH082qFo4GvuPX0a7WfG
       role: admin
+    thiagooooo:
+      email: thiago@gmail.com
+      failed_login_attempts: 1
+      logged_in: false
+      name: Thiago
+      password: $2b$12$q7F5v1Vxr442GiHefSfZYeSY4fe2trVjJCkK0pOD7dCjrX/DIjM2C
+      role: user
     thiagoteste:
       client_code: 8236274157823465
       email: emailteste@gmail.com
