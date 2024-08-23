@@ -11,6 +11,21 @@ credentials:
       name: administrador
       password: $2b$12$Sokl8kSZOCJd2J1UCf3uvuqQ.2vZR2VeBlqV6HJAX7sW5Zjt3c61m
       role: admin
+    raia:
+      client_code: RAIA_DROGASIL
+      email: raia@gmail.com
+      failed_login_attempts: 1
+      logged_in: false
+      name: raia
+      password: $2b$12$L2pdtPKSWj9kIQ9sHDEQA.bjbwHdsVs0ecZRq0JmzH5S0ACWIXt4O
+      role: user
+    scania:
+      client_code: SCANIA LATIN AMERICA LTDA
+      email: scania@gmail.com
+      logged_in: true
+      name: scania
+      password: $2b$12$1E8nYs3GGrqUchtpMmtU6.lwOjR1y7lkb/BOObb9DT1H1MMN27GIW
+      role: user
 form_labels:
   register:
     email: "Endere\xE7o de Email"

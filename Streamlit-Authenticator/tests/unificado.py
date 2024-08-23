@@ -6,14 +6,11 @@ from streamlit_authenticator.utilities.exceptions import (CredentialsError, Forg
 import pyodbc
 import pandas as pd
 from cryptography.fernet import Fernet
-from PIL import Image
 import plotly.express as px
-import streamlit.components.v1 as components
-import io
-import time
 import base64
 import smtplib
 from email.mime.text import MIMEText
+from streamlit_option_menu import option_menu
 
 st.set_page_config(
     layout="wide",
@@ -172,6 +169,7 @@ data = st.session_state.data
 colpos1, colpos2, colpos3 = st.columns(3) #define colunas de posição
 
 
+
 try:
     with colpos2:
         authenticator.login(fields={
@@ -258,6 +256,7 @@ if st.session_state["authentication_status"]:
                             st.success('Senha alterada com sucesso!')
                     except Exception as e:
                         st.error(e)
+
             st.sidebar.title("Filtros")
             # Utilize st.session_state para armazenar e manter os valores dos filtros
             
@@ -647,7 +646,14 @@ if st.session_state["authentication_status"]:
 
             # Exibir o intervalo de datas formatado
             st.sidebar.write("Período selecionado:", formatted_start_date, "-", formatted_end_date)
-
+            selected = option_menu(
+                menu_title=None,  # Título do menu, pode ser None
+                options=['Início', 'Dashboard', 'Contato'],  # Opções do menu
+                icons=['house', 'bar-chart', 'envelope'],  # Ícones das opções (opcional)
+                menu_icon="cast",  # Ícone do menu
+                default_index=0,  # Índice padrão
+                orientation="horizontal"  # Alinhamento do menu (opcional)
+            )
             #Início do bloco de gráficos
             A4Pb = df_selection['pb_peq'].sum()
             A4Cor = df_selection['cor_peq'].sum()
