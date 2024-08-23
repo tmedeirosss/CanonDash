@@ -152,7 +152,7 @@ if st.session_state.enterprise_id is not None:
     # Criptografia do código do cliente
     if codigo_cliente:
         if banco_de_origem == "NDD":
-            codigo_criptografado = encrypt_number(codigo_cliente)
+            codigo_criptografado = encrypt_number(empresa_selecionada)
         elif banco_de_origem == "IwRemote":
             codigo_criptografado = encrypt_number(empresa_selecionada)
         st.write("Chave gerada com sucesso", decrypt_code(codigo_criptografado))
