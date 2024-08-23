@@ -4,9 +4,9 @@ cookie:
   name: some_cookie_name
 credentials:
   usernames:
-    administrador2:
-      client_code: 8236274157823465
-      email: administrador2@gmail.com
+    administrador:
+      client_code: '8236274157823465'
+      email: administrador@gmail.com
       logged_in: true
       name: Thiago
       password: $2b$12$q2XO.jcGXUOT02Gz4F0/wu15KJnMr0prwVIPTct2IRaOYUSx5N9a6
@@ -128,13 +128,6 @@ credentials:
       name: Thiago
       password: $2b$12$nK5kHSn3h0JmsNWy2xfzQeDDNEoKs4caQfH082qFo4GvuPX0a7WfG
       role: admin
-    thiagooooo:
-      email: thiago@gmail.com
-      failed_login_attempts: 1
-      logged_in: false
-      name: Thiago
-      password: $2b$12$q7F5v1Vxr442GiHefSfZYeSY4fe2trVjJCkK0pOD7dCjrX/DIjM2C
-      role: user
     thiagoteste:
       client_code: 8236274157823465
       email: emailteste@gmail.com
@@ -157,22 +150,6 @@ credentials:
       name: usuario administrador
       password: $2b$12$KAsH453NhKve.8BZgbobOOYutyqa.58WHs9lS2ULmg6ENviHt75ZC
       role: admin
-    wdewe:
-      email: wedw@ew.com
-      enterprise_code: null
-      failed_login_attempts: 0
-      logged_in: false
-      name: dwew
-      password: $2b$12$QJBPc7PxaTTBVJ.3cl4KlOPPqYCWVfaHqkk2IsoGDExXhihKZLDgy
-      role: user
-    zelo:
-      client_code: 15622
-      email: zelo@gmail.com
-      failed_login_attempts: 0
-      logged_in: true
-      name: zelo
-      password: $2b$12$aw5tiGAOoQjx6dJsuWVJGux5oJmnqQjweuLAuNKUnHe6qCmejpzw2
-      role: user
 form_labels:
   register:
     email: "Endere\xE7o de Email"

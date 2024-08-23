@@ -75,11 +75,33 @@ with st.spinner("Carregando..."):
     password = 'ioas!@#ibusad$%$!@asd3'  # Senha
     connection_string = f'DRIVER={{ODBC Driver 17 for SQL Server}};SERVER={server};DATABASE={database};UID={username};PWD={password}'
 
+    banco_de_origem = st.selectbox('Selecione o Banco de Dados de Origem', options=["NDD", "IwRemote"])
+    if banco_de_origem == "NDD":
+        consulta= "SELECT EnterpriseID, EnterpriseName, ModelName, SerialNumber, pb_peq, pb_grande, cor_peq, cor_grande, cor_total, total, data FROM [Db_RPA].[dbo].[vw_NDD]"
+    elif banco_de_origem == "IwRemote":
+        consulta= """
+        SELECT 
+        CHECKSUM([Ship To Name]) AS EnterpriseID,
+        [Ship To Name] AS EnterpriseName,
+        [Item Code] AS ModelName,
+        [Serial#] AS SerialNumber,
+        pb_peq,
+        pb_grande,
+        cor_peq,
+        cor_grande,
+        cor_total,
+        total,
+        data
+    FROM 
+        [Db_RPA].[dbo].[vw_IW_Main]
+    """
+
+    # Conectando ao banco de dados
     # Conectando ao banco de dados
     connection = pyodbc.connect(connection_string)
 
     # Consulta SQL
-    query = 'SELECT EnterpriseName, EnterpriseID FROM [Db_RPA].[dbo].[vw_NDD]'
+    query = consulta
 
     # Carregar dados no DataFrame do pandas
     df = pd.read_sql(query, connection)
@@ -97,7 +119,7 @@ if 'enterprise_id' not in st.session_state:
     st.session_state.enterprise_id = None
 
 # Opções para o selectbox
-options = list(df['EnterpriseName'].unique())
+options = list(df['EnterpriseName'].drop_duplicates())
 
 # Criação do selectbox com chave 'dropdown_selection'
 empresa_selecionada = st.selectbox(
@@ -129,8 +151,11 @@ if st.session_state.enterprise_id is not None:
 
     # Criptografia do código do cliente
     if codigo_cliente:
-        codigo_criptografado = encrypt_number(codigo_cliente)
-        st.write("Chave gerada com sucesso")
+        if banco_de_origem == "NDD":
+            codigo_criptografado = encrypt_number(empresa_selecionada)
+        elif banco_de_origem == "IwRemote":
+            codigo_criptografado = encrypt_number(empresa_selecionada)
+        st.write("Chave gerada com sucesso", decrypt_code(codigo_criptografado))
 
         # Adiciona um botão para baixar o código criptografado
         st.download_button(

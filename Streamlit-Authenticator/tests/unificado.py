@@ -133,10 +133,40 @@ def send_reset_email(email, nova_senha):
 
 # Manter os dados carregados no estado de sessão
 if 'data' not in st.session_state:
-    query = "SELECT EnterpriseID, EnterpriseName, ModelName, SerialNumber, pb_peq, pb_grande, cor_peq, cor_grande, cor_total, total, data FROM [Db_RPA].[dbo].[vw_NDD]"
+    query = """SELECT
+    'vw_IW_Main' AS tabela,
+    [Ship To Name] AS EnterpriseName,
+    [Item Code] AS ModelName,
+    [Serial#] AS SerialNumber,
+    pb_peq,
+    pb_grande,
+    cor_peq,
+    cor_grande,
+    cor_total,
+    total,
+    data
+FROM 
+    [Db_RPA].[dbo].[vw_IW_Main]
+
+UNION ALL
+
+SELECT
+    'vw_NDD' AS tabela,
+    EnterpriseName,
+    ModelName,
+    SerialNumber,
+    pb_peq,
+    pb_grande,
+    cor_peq,
+    cor_grande,
+    cor_total,
+    total,
+    data
+FROM 
+    [Db_RPA].[dbo].[vw_NDD]"""
     st.session_state.data = fetch_data(query)
 
-admin_code = 8236274157823465
+admin_code = str(8236274157823465)
 data = st.session_state.data
 
 colpos1, colpos2, colpos3 = st.columns(3) #define colunas de posição
@@ -176,8 +206,8 @@ if st.session_state["authentication_status"]:
         client_code_input = arquivo_carregado.read().decode("utf-8")
         client_code_input_decript = decrypt_code(client_code_input)
         if st.button("Salvar"):
-            client_code = int(client_code_input_decript)
-            if client_code in data['EnterpriseID'].values or client_code == admin_code:
+            client_code = client_code_input_decript
+            if client_code in data['EnterpriseName'].values or client_code == admin_code:
                 config['credentials']['usernames'][client_id]['client_code'] = client_code
 
                 # Salvar as informações atualizadas no arquivo YAML
@@ -188,6 +218,7 @@ if st.session_state["authentication_status"]:
                 st.experimental_rerun()
             else:
                 st.error("Código do cliente não encontrado na base de dados.")
+                st.write(client_code, type(client_code), admin_code, type(admin_code))
     else:
         # Código do cliente já está presente, verifique se está na base de dados
         tipo_usuario(client_id)
@@ -206,7 +237,7 @@ if st.session_state["authentication_status"]:
                     if st.button("Salvar"):
                         client_code_input = decrypt_code(client_code_input)
                         # Atualizar a configuração do cliente
-                        config['credentials']['usernames'][client_id]['client_code'] = int(client_code_input)
+                        config['credentials']['usernames'][client_id]['client_code'] = client_code_input
 
                         # Salvar as informações atualizadas no arquivo YAML
                         with open('../config.yaml', 'w', encoding='utf-8') as file:
@@ -229,6 +260,7 @@ if st.session_state["authentication_status"]:
                         st.error(e)
             st.sidebar.title("Filtros")
             # Utilize st.session_state para armazenar e manter os valores dos filtros
+            
             if 'selected_enterprise' not in st.session_state:
                 st.session_state.selected_enterprise = "Todos"
             if 'selected_model' not in st.session_state:
@@ -237,6 +269,26 @@ if st.session_state["authentication_status"]:
                 st.session_state.selected_serial = "Todos"
             if 'selected_date_range' not in st.session_state:
                 st.session_state.selected_date_range = None
+
+            # Definir as opções de tabelas
+            tabela_options = ["NDD", "IW"]
+            st.session_state.selected_tabelas = st.sidebar.multiselect(
+                "Selecione o banco de dados",
+                options=tabela_options,
+                default=st.session_state.get('selected_tabelas', tabela_options)
+            )
+
+            # Filtrar os dados com base nas tabelas selecionadas
+            if "NDD" in st.session_state.selected_tabelas and "IW" in st.session_state.selected_tabelas:
+                filtered_data = data  # Não filtra nada, exibe tudo
+            elif "NDD" in st.session_state.selected_tabelas:
+                filtered_data = data[data['tabela'] == 'vw_NDD']  # Filtra apenas os dados de NDD
+            elif "IW" in st.session_state.selected_tabelas:
+                filtered_data = data[data['tabela'] == 'vw_IW_Main']  # Filtra apenas os dados de IW
+            else:
+                st.warning("Selecione um ou mais bancos de dados para a consulta")
+                st.stop()
+                
             
             modo_grafico = st.sidebar.selectbox(label="Selecione Gráficos Desejados", options=["Gráfico Gerencial", "Gráfico Cliente"], index = 0)
             st.write(modo_grafico)
@@ -245,7 +297,7 @@ if st.session_state["authentication_status"]:
             else:
                 index_cliente = 0
 
-
+            
 
             # Primeiro filtro: Cliente
             enterprise_options = ["Todos"] + list(data['EnterpriseName'].unique())
@@ -257,7 +309,7 @@ if st.session_state["authentication_status"]:
             
             # Filtrar os modelos com base no cliente selecionado
             if st.session_state.selected_enterprise == "Todos":
-                filtered_data = data
+                filtered_data = filtered_data
             else:
                 filtered_data = data[data['EnterpriseName'] == st.session_state.selected_enterprise]
             
@@ -491,7 +543,7 @@ if st.session_state["authentication_status"]:
                     if st.button("Salvar"):
                         client_code_input = decrypt_code(client_code_input)
                         # Atualizar a configuração do cliente
-                        config['credentials']['usernames'][client_id]['client_code'] = int(client_code_input)
+                        config['credentials']['usernames'][client_id]['client_code'] = client_code_input
 
                         # Salvar as informações atualizadas no arquivo YAML
                         with open('../config.yaml', 'w', encoding='utf-8') as file:
@@ -525,7 +577,7 @@ if st.session_state["authentication_status"]:
                 st.session_state.selected_date_range = None
 
             # Primeiro filtro: Cliente
-            enterprise_names = data[data['EnterpriseID'] == config['credentials']['usernames'][client_id]['client_code']]['EnterpriseName']
+            enterprise_names = data[data['EnterpriseName'] == config['credentials']['usernames'][client_id]['client_code']]['EnterpriseName']
             enterprise_options = list(enterprise_names.unique())  # Convertendo para lista depois de aplicar .unique()
 
             st.session_state.selected_enterprise = st.sidebar.selectbox(
