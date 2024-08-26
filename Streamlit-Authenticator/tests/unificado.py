@@ -6,14 +6,11 @@ from streamlit_authenticator.utilities.exceptions import (CredentialsError, Forg
 import pyodbc
 import pandas as pd
 from cryptography.fernet import Fernet
-from PIL import Image
 import plotly.express as px
-import streamlit.components.v1 as components
-import io
-import time
 import base64
 import smtplib
 from email.mime.text import MIMEText
+from streamlit_option_menu import option_menu
 
 st.set_page_config(
     layout="wide",
@@ -23,6 +20,26 @@ st.set_page_config(
         'About': None
     }
 )
+# Criando a barra de navegação no topo
+selected = option_menu(
+    menu_title=None,  # O título da barra de navegação (None para ocultar)
+    options=["Início", "Dashboard", "Contato"],  # As opções do menu
+    icons=["house", "bar-chart", "envelope"],  # Ícones correspondentes às opções
+    menu_icon="cast",  # Ícone do menu
+    default_index=0,  # Índice da opção selecionada por padrão
+    orientation="horizontal",  # Define a orientação como horizontal
+)
+
+# Exibindo conteúdo baseado na opção selecionada
+if selected == "Início":
+    st.title("Página Inicial")
+    st.write("Conteúdo da página inicial.")
+elif selected == "Dashboard":
+    st.title("Dashboard")
+    st.write("Conteúdo do dashboard.")
+elif selected == "Contato":
+    st.title("Contato")
+    st.write("Informações de contato.")
 
 def get_base64_image(image_path):
     with open(image_path, "rb") as image_file:
@@ -172,6 +189,7 @@ data = st.session_state.data
 colpos1, colpos2, colpos3 = st.columns(3) #define colunas de posição
 
 
+
 try:
     with colpos2:
         authenticator.login(fields={
@@ -258,6 +276,7 @@ if st.session_state["authentication_status"]:
                             st.success('Senha alterada com sucesso!')
                     except Exception as e:
                         st.error(e)
+
             st.sidebar.title("Filtros")
             # Utilize st.session_state para armazenar e manter os valores dos filtros
             

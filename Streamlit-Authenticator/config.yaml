@@ -11,6 +11,13 @@ credentials:
       name: administrador
       password: $2b$12$Sokl8kSZOCJd2J1UCf3uvuqQ.2vZR2VeBlqV6HJAX7sW5Zjt3c61m
       role: admin
+    astrazeneca:
+      client_code: ASTRAZENECA_DO_BRASIL
+      email: astrazeneca@gmail.com
+      logged_in: true
+      name: astrazeneca
+      password: $2b$12$g0/KpaqO/vMqxEW9Y4OdAeiCShml3inbIqPar83NYaQorngMPX4Ky
+      role: user
 form_labels:
   register:
     email: "Endere\xE7o de Email"
