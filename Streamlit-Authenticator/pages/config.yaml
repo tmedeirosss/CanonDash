@@ -7,16 +7,26 @@ credentials:
     administrador:
       client_code: '8236274157823465'
       email: administrador@gmail.com
+      failed_login_attempts: 0
       logged_in: true
       name: administrador
-      password: $2b$12$Sokl8kSZOCJd2J1UCf3uvuqQ.2vZR2VeBlqV6HJAX7sW5Zjt3c61m
+      password: $2b$12$QJG/X7dhcVpvT6xwgBg3t.XryUCxOkFFMqAZsCln4HdoO86lIXlA6
       role: admin
     astrazeneca:
       client_code: ASTRAZENECA_DO_BRASIL
       email: astrazeneca@gmail.com
+      failed_login_attempts: 0
       logged_in: true
       name: astrazeneca
       password: $2b$12$g0/KpaqO/vMqxEW9Y4OdAeiCShml3inbIqPar83NYaQorngMPX4Ky
+      role: user
+    thiteste:
+      client_code: ASTRAZENECA_DO_BRASIL
+      email: thiagoteste@gmail.com
+      failed_login_attempts: 1
+      logged_in: false
+      name: Thiago Teste
+      password: $2b$12$I9EHF9ByzFlAWAw2vsV61.r7aGTNRU4zdVlTVtuKyGTa/92atsn7W
       role: user
 form_labels:
   register:

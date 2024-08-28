@@ -55,3 +55,8 @@ header[data-testid="stHeader"] {
 .stButton button:hover {
     background-color: #cc0000fa; /* Cor de fundo ao passar o mouse */
 }
+
+/* Ocultar a setinha que expande/recolhe a sidebar */
+.eyeqlp52 {
+    display: none;
+}

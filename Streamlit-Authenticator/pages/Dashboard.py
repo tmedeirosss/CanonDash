@@ -1,110 +1,8 @@
 import yaml
-from yaml.loader import SafeLoader
 import streamlit as st
-import streamlit_authenticator as stauth
-from streamlit_authenticator.utilities.exceptions import (CredentialsError, ForgotError, LoginError, RegisterError, ResetError, UpdateError)
-import pyodbc
 import pandas as pd
-from cryptography.fernet import Fernet
 import plotly.express as px
-import base64
-import smtplib
-from email.mime.text import MIMEText
-from streamlit_option_menu import option_menu
-
-st.set_page_config(
-    layout="wide",
-    page_title="Canon Dashboard",
-    page_icon="pages/Canon-Logo.png",  # Você pode usar um ícone emoji ou uma URL de ícone
-    menu_items={  # Esvazia os itens do menu para ocultar a barra de deploy
-        'About': None
-    }
-)
-
-def get_base64_image(image_path):
-    with open(image_path, "rb") as image_file:
-        return base64.b64encode(image_file.read()).decode()
-    
-logo_base64 = get_base64_image("Canon-Logo.png")
-
-
-with open('styles.css') as f:
-    st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html= True)
-
-
-
-st.markdown(f'''
-    <div class="header">
-        <img src="data:image/png;base64,{logo_base64}" alt="Logo">
-    </div>
-''', unsafe_allow_html=True)
-
-
-
-# Carregar arquivo de configuração
-with open('../config.yaml', 'r', encoding='utf-8') as file:
-    config = yaml.load(file, Loader=SafeLoader)
-
-
-
-# Garantir que todos os usuários tenham o campo 'role'
-for username, user_info in config['credentials']['usernames'].items():
-    if 'role' not in user_info:
-        user_info['role'] = 'user'
-
-# Criar o objeto autenticador
-authenticator = stauth.Authenticate(
-    config['credentials'],
-    config['cookie']['name'],
-    config['cookie']['key'],
-    config['cookie']['expiry_days'],
-    config.get('pre-authorized', {}),
-    config['credentials']['usernames']
-)
-
-# Configuração da conexão com o banco de dados
-def get_connection():
-    try:
-        connection_string = (
-            "DRIVER={ODBC Driver 17 for SQL Server};"
-            "SERVER=192.168.41.22;"
-            "DATABASE=Db_RPA;"
-            "UID=ndd_viewer;"
-            "PWD=ioas!@#ibusad$%$!@asd3;"
-        )
-        connection = pyodbc.connect(connection_string)
-        #st.success("Conexão com o banco de dados estabelecida com sucesso.")
-        return connection
-    except pyodbc.Error as e:
-        st.error(f"Erro ao conectar ao banco de dados: {e}")
-        return None
-
-def fetch_data(query):
-    try:
-        connection = get_connection()
-        if connection is not None:
-            data = pd.read_sql(query, connection)
-            data['data'] = pd.to_datetime(data['data']).dt.date  # Convertendo para formato de data
-            connection.close()
-            if data.empty:
-                st.warning("Nenhum dado encontrado para o ID fornecido.")
-                return None
-            else:
-                return data
-    except pyodbc.Error as e:
-        st.error(f"Erro ao executar a consulta: {e}")
-        return None
-
-def tipo_usuario(valor_id):
-    user = config['credentials']['usernames']
-    role = user[valor_id].get('role', 'user')
-    return role
-
-def encrypt_number(number: str) -> str:
-    key = open('secret.key', 'rb').read()
-    cipher_suite = Fernet(key)
-    encrypted_number = cipher_suite.encrypt(number.encode())
-    return encrypted_number.decode()
+from cryptography.fernet import Fernet
 
 
 def decrypt_code(encrypted_code: str) -> str:
@@ -116,112 +14,9 @@ def decrypt_code(encrypted_code: str) -> str:
     except InvalidToken:
         return "Código inválido ou chave incorreta"
     
-def send_reset_email(email, nova_senha):
-    sender = "Canon_Dashboard@cusa.canon.com"
-    
-
-    msg = MIMEText(f"Essa é sua nova senha: {nova_senha}")
-    msg["Subject"] = "Redefinição de senha"
-    msg["From"] = sender
-    msg["To"] = email
-
-    with smtplib.SMTP("Melville-app-mail.cusa.canon.com", 25) as server:
-        server.sendmail(sender, email, msg.as_string())
-
-# Manter os dados carregados no estado de sessão
-if 'data' not in st.session_state:
-    query = """SELECT
-    'vw_IW_Main' AS tabela,
-    [Ship To Name] AS EnterpriseName,
-    [Item Code] AS ModelName,
-    [Serial#] AS SerialNumber,
-    pb_peq,
-    pb_grande,
-    cor_peq,
-    cor_grande,
-    cor_total,
-    total,
-    data
-FROM 
-    [Db_RPA].[dbo].[vw_IW_Main]
-
-UNION ALL
-
-SELECT
-    'vw_NDD' AS tabela,
-    EnterpriseName,
-    ModelName,
-    SerialNumber,
-    pb_peq,
-    pb_grande,
-    cor_peq,
-    cor_grande,
-    cor_total,
-    total,
-    data
-FROM 
-    [Db_RPA].[dbo].[vw_NDD]"""
-    st.session_state.data = fetch_data(query)
-
 admin_code = str(8236274157823465)
-data = st.session_state.data
 
-colpos1, colpos2, colpos3 = st.columns(3) #define colunas de posição
-
-
-
-try:
-    with colpos2:
-        authenticator.login(fields={
-            'Form name': 'Login',
-            'Username': 'Nome de Usuário',
-            'Password': 'Senha',
-            'Login': 'Entrar'
-        })
-        
-except LoginError as e:
-    st.error(e)
-
-if st.session_state["authentication_status"]:
-    authenticator.logout(button_name= 'Sair')
-    if st.session_state["name"] is None:
-        st.write('Aguarde...')
-        st.stop()
-    else:
-        st.write(f'Bem vindo *{st.session_state["name"]}*')
-    client_id = st.session_state["username"]
-
-    # Verificar se o código do cliente está presente
-    client_info = config['credentials']['usernames'][client_id]
-    if 'client_code' not in client_info or not client_info['client_code']:
-        st.info("Clique no botão 'Browse files' para adicionar a chave de acesso.")
-        arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="collapsed", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
-        if not arquivo_carregado:
-            st.warning('A chave de acesso garante a segurança de suas informações e será solicitada somente no primeiro acesso.')
-            st.stop()
-        st.success("Chave adicionada com sucesso!")
-                   
-        client_code_input = arquivo_carregado.read().decode("utf-8")
-        client_code_input_decript = decrypt_code(client_code_input)
-        if st.button("Salvar"):
-            client_code = client_code_input_decript
-            if client_code in data['EnterpriseName'].values or client_code == admin_code:
-                config['credentials']['usernames'][client_id]['client_code'] = client_code
-
-                # Salvar as informações atualizadas no arquivo YAML
-                with open('../config.yaml', 'w', encoding='utf-8') as file:
-                    yaml.dump(config, file, default_flow_style=False)
-
-                st.success("Código do cliente atualizado com sucesso.")
-                st.experimental_rerun()
-            else:
-                st.error("Código do cliente não encontrado na base de dados.")
-                st.write(client_code, type(client_code), admin_code, type(admin_code))
-    else:
-        # Código do cliente já está presente, verifique se está na base de dados
-        tipo_usuario(client_id)
-        role = tipo_usuario(client_id)
-        if role == 'admin': #Bloco de dashboard do administrador
+if st.session_state.role == 'admin': #Bloco de dashboard do administrador
 
             st.write("Dados carregados com sucesso.")
             
@@ -235,24 +30,24 @@ if st.session_state["authentication_status"]:
                     if st.button("Salvar"):
                         client_code_input = decrypt_code(client_code_input)
                         # Atualizar a configuração do cliente
-                        config['credentials']['usernames'][client_id]['client_code'] = client_code_input
+                        st.session_state.config['credentials']['usernames'][st.session_state["username"]]['client_code'] = client_code_input
 
                         # Salvar as informações atualizadas no arquivo YAML
-                        with open('../config.yaml', 'w', encoding='utf-8') as file:
-                            yaml.dump(config, file, default_flow_style=False)
+                        with open('config.yaml', 'w', encoding='utf-8') as file:
+                            yaml.dump(st.session_state.config, file, default_flow_style=False)
                         
                         st.sidebar.success("Código do cliente atualizado com sucesso.")
             with st.sidebar.expander('Alterar Senha'):
                 if st.session_state['authentication_status']:
                     try:
-                        if authenticator.reset_password(st.session_state['username'], fields= {'Form name':'Atualizar Senha', 
+                        if st.session_state.authenticator.reset_password(st.session_state['username'], fields= {'Form name':'Atualizar Senha', 
                                                                                                'Current password':'Senha Atual', 
                                                                                                'New password':'Nova Senha', 
                                                                                                'Repeat password': 'Repita a Senha', 
                                                                                                'Reset':'OK'}):
                             # Salvar as informações atualizadas no arquivo YAML
-                            with open('../config.yaml', 'w', encoding='utf-8') as file:
-                                yaml.dump(config, file, default_flow_style=False)
+                            with open('config.yaml', 'w', encoding='utf-8') as file:
+                                yaml.dump(st.session_state.config, file, default_flow_style=False)
                             st.success('Senha alterada com sucesso!')
                     except Exception as e:
                         st.error(e)
@@ -279,11 +74,11 @@ if st.session_state["authentication_status"]:
 
             # Filtrar os dados com base nas tabelas selecionadas
             if "NDD" in st.session_state.selected_tabelas and "IW" in st.session_state.selected_tabelas:
-                filtered_data = data  # Não filtra nada, exibe tudo
+                filtered_data = st.session_state.data  # Não filtra nada, exibe tudo
             elif "NDD" in st.session_state.selected_tabelas:
-                filtered_data = data[data['tabela'] == 'vw_NDD']  # Filtra apenas os dados de NDD
+                filtered_data = st.session_state.data[st.session_state.data['tabela'] == 'vw_NDD']  # Filtra apenas os dados de NDD
             elif "IW" in st.session_state.selected_tabelas:
-                filtered_data = data[data['tabela'] == 'vw_IW_Main']  # Filtra apenas os dados de IW
+                filtered_data = st.session_state.data[st.session_state.data['tabela'] == 'vw_IW_Main']  # Filtra apenas os dados de IW
             else:
                 st.warning("Selecione um ou mais bancos de dados para a consulta")
                 st.stop()
@@ -299,7 +94,7 @@ if st.session_state["authentication_status"]:
             
 
             # Primeiro filtro: Cliente
-            enterprise_options = ["Todos"] + list(data['EnterpriseName'].unique())
+            enterprise_options = ["Todos"] + list(st.session_state.data['EnterpriseName'].unique())
             st.session_state.selected_enterprise = st.sidebar.selectbox(
                 "Selecione o nome da empresa",
                 options=enterprise_options,
@@ -310,7 +105,7 @@ if st.session_state["authentication_status"]:
             if st.session_state.selected_enterprise == "Todos":
                 filtered_data = filtered_data
             else:
-                filtered_data = data[data['EnterpriseName'] == st.session_state.selected_enterprise]
+                filtered_data = st.session_state.data[st.session_state.data['EnterpriseName'] == st.session_state.selected_enterprise]
             
             # Segundo filtro: Modelo
             model_options = ["Todos"] + list(filtered_data['ModelName'].unique())
@@ -527,10 +322,10 @@ if st.session_state["authentication_status"]:
                     st.dataframe(df_resumo_total, hide_index= True)
 
         
-        elif role == 'user' and str(config['credentials']['usernames'][client_id]['client_code']) == str(admin_code): 
+elif st.session_state.role == 'user' and str(st.session_state.config['credentials']['usernames'][st.session_state["username"]]['client_code']) == str(admin_code): 
             st.warning('Contate o seu representante Canon')
             st.stop()
-        else:  #Bloco de dashboard do cliente
+else:  #Bloco de dashboard do cliente
             st.write('Você possui acesso somente as suas informações')
             
             # Campo de entrada para o código do cliente na barra lateral
@@ -542,24 +337,24 @@ if st.session_state["authentication_status"]:
                     if st.button("Salvar"):
                         client_code_input = decrypt_code(client_code_input)
                         # Atualizar a configuração do cliente
-                        config['credentials']['usernames'][client_id]['client_code'] = client_code_input
+                        st.session_state.config['credentials']['usernames'][st.session_state["username"]]['client_code'] = client_code_input
 
                         # Salvar as informações atualizadas no arquivo YAML
-                        with open('../config.yaml', 'w', encoding='utf-8') as file:
-                            yaml.dump(config, file, default_flow_style=False)
+                        with open('config.yaml', 'w', encoding='utf-8') as file:
+                            yaml.dump(st.session_state.config, file, default_flow_style=False)
                         
                         st.sidebar.success("Código do cliente atualizado com sucesso.")
             with st.sidebar.expander('Alterar Senha'):
                 if st.session_state['authentication_status']:
                     try:
-                        if authenticator.reset_password(st.session_state['username'], fields= {'Form name':'Atualizar Senha', 
+                        if st.session_state.authenticator.reset_password(st.session_state['username'], fields= {'Form name':'Atualizar Senha', 
                                                                                                'Current password':'Senha Atual', 
                                                                                                'New password':'Nova Senha', 
                                                                                                'Repeat password': 'Repita a Senha', 
                                                                                                'Reset':'OK'}):
                             # Salvar as informações atualizadas no arquivo YAML
-                            with open('../config.yaml', 'w', encoding='utf-8') as file:
-                                yaml.dump(config, file, default_flow_style=False)
+                            with open('config.yaml', 'w', encoding='utf-8') as file:
+                                yaml.dump(st.session_state.config, file, default_flow_style=False)
                             st.success('Senha alterada com sucesso!')
                     except Exception as e:
                         st.error(e)
@@ -576,7 +371,7 @@ if st.session_state["authentication_status"]:
                 st.session_state.selected_date_range = None
 
             # Primeiro filtro: Cliente
-            enterprise_names = data[data['EnterpriseName'] == config['credentials']['usernames'][client_id]['client_code']]['EnterpriseName']
+            enterprise_names = st.session_state.data[st.session_state.data['EnterpriseName'] == st.session_state.config['credentials']['usernames'][st.session_state["username"]]['client_code']]['EnterpriseName']
             enterprise_options = list(enterprise_names.unique())  # Convertendo para lista depois de aplicar .unique()
 
             st.session_state.selected_enterprise = st.sidebar.selectbox(
@@ -587,9 +382,9 @@ if st.session_state["authentication_status"]:
             
             # Filtrar os modelos com base no cliente selecionado
             if st.session_state.selected_enterprise == "Todos":
-                filtered_data = data
+                filtered_data = st.session_state.data
             else:
-                filtered_data = data[data['EnterpriseName'] == st.session_state.selected_enterprise]
+                filtered_data = st.session_state.data[st.session_state.data['EnterpriseName'] == st.session_state.selected_enterprise]
             
             # Segundo filtro: Modelo
             model_options = ["Todos"] + list(filtered_data['ModelName'].unique())
@@ -646,14 +441,7 @@ if st.session_state["authentication_status"]:
 
             # Exibir o intervalo de datas formatado
             st.sidebar.write("Período selecionado:", formatted_start_date, "-", formatted_end_date)
-            selected = option_menu(
-                menu_title=None,  # Título do menu, pode ser None
-                options=['Início', 'Dashboard', 'Contato'],  # Opções do menu
-                icons=['house', 'bar-chart', 'envelope'],  # Ícones das opções (opcional)
-                menu_icon="cast",  # Ícone do menu
-                default_index=0,  # Índice padrão
-                orientation="horizontal"  # Alinhamento do menu (opcional)
-            )
+
             #Início do bloco de gráficos
             A4Pb = df_selection['pb_peq'].sum()
             A4Cor = df_selection['cor_peq'].sum()
@@ -766,106 +554,3 @@ if st.session_state["authentication_status"]:
             df_resumo_total.update(df_resumo_total.loc[:, df_resumo_total.columns != coluna_ignorada].apply(pd.to_numeric, errors='coerce'))
             df_resumo_total = df_resumo_total.loc[:, (df_resumo_total != 0).any(axis=0)]
             st.dataframe(df_resumo_total, hide_index= True)
-
-        # Rodapé com HTML e CSS
-        footer = """
-        <style>
-        .footer {
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            background-color: #f1f1f1;
-            text-align: center;
-            padding: 3px;
-            font-size: 14px;
-            color: #555;
-            height: 30px;  /* Ajusta a altura do rodapé */
-        }
-        </style>
-        <div class="footer">
-            <p>© 2024 Canon do Brasil. Todos os direitos reservados.</p>
-        </div>
-        """
-
-        st.markdown(footer, unsafe_allow_html=True)
-
-            #st.dataframe(df_selection)
-            
-
-
-elif st.session_state["authentication_status"] is False:
-    with colpos2:
-        st.error('Usuário/Senha incorreta')
-elif st.session_state["authentication_status"] is None:
-    with colpos2:
-        st.warning('Por favor, insira seu nome de usuário e senha')
-
-if st.session_state["authentication_status"] is None or st.session_state["authentication_status"] is False:
-    try:
-        with colpos2:
-            with st.expander('Criar uma conta'):
-                (email_of_registered_user, username_of_registered_user, name_of_registered_user) = authenticator.register_user(fields={
-                    
-                'Form name': 'Cadastrar',
-                'Name': 'Nome Completo',
-                'Email':'Email',
-                'Username': 'Nome de Usuário',
-                'Password': 'Senha',
-                'Repeat password': 'Repita a Senha',
-                'Register': 'Registrar',
-            
-                },pre_authorization=False)
-                if email_of_registered_user:
-                    st.success('Usuário registrado com sucesso!')
-    except RegisterError as e:
-        with colpos2:
-            st.error(e)
-
-    try:
-        with colpos2:
-            with st.expander('Esqueceu a senha?'):
-                (username_of_forgotten_password, email_of_forgotten_password, new_random_password) = authenticator.forgot_password(fields={
-                    'Form name': 'Esqueci a senha',
-                    'Username': 'Usuário',
-                    'Submit': 'Recuperar',
-                })
-                if username_of_forgotten_password:
-                    send_reset_email(email_of_forgotten_password, new_random_password)
-                    
-                    # Salvar as informações atualizadas no arquivo YAML
-                    with open('../config.yaml', 'w', encoding='utf-8') as file:
-                        yaml.dump(config, file, default_flow_style=False)
-                    st.success('Nova senha enviada')
-                elif not username_of_forgotten_password:
-                    st.error('Nome de usuário não localizado')
-    except ForgotError as e:
-        with colpos2:
-            st.error(e)
-
-    try:
-        with colpos2:
-            with st.expander('Esqueceu o usuário?'):
-                (username_of_forgotten_username, email_of_forgotten_username) = authenticator.forgot_username(fields={
-                    'Form name': 'Esqueci o Usuário',
-                    'Email': 'Email',
-                    'Submit': 'Recuperar',
-                })
-                if username_of_forgotten_username:
-                    st.success('Nome de usuário enviado')
-                elif not username_of_forgotten_username:
-                    st.error('Email não localizado')
-    except ForgotError as e:
-        with colpos2:
-            st.error(e)
-
-    if st.session_state["authentication_status"]:
-        try:
-            if authenticator.update_user_details(st.session_state["username"]):
-                st.success('Entries updated successfully')
-        except UpdateError as e:
-            st.error(e)
-
-# Salvar as informações atualizadas no arquivo YAML
-with open('../config.yaml', 'w', encoding='utf-8') as file:
-    yaml.dump(config, file, default_flow_style=False)
