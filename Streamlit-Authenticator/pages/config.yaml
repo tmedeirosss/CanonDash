@@ -12,6 +12,14 @@ credentials:
       name: administrador
       password: $2b$12$QJG/X7dhcVpvT6xwgBg3t.XryUCxOkFFMqAZsCln4HdoO86lIXlA6
       role: admin
+    amaro:
+      client_code: AMARO_LTDA
+      email: amaro@gmail.com
+      failed_login_attempts: 0
+      logged_in: true
+      name: amaro
+      password: $2b$12$4Qd2mcrx1XojI/mz2uTFFeF4H32HxHI1triBFoXSQaeXO3qlyCVBe
+      role: user
     astrazeneca:
       client_code: ASTRAZENECA_DO_BRASIL
       email: astrazeneca@gmail.com

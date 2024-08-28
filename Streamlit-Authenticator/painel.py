@@ -23,10 +23,10 @@ def get_base64_image(image_path):
     with open(image_path, "rb") as image_file:
         return base64.b64encode(image_file.read()).decode()
     
-logo_base64 = get_base64_image("Canon-Logo.png")
+logo_base64 = get_base64_image("pages/Canon-Logo.png")
 
 
-with open('styles.css') as f:
+with open('pages/styles.css') as f:
     st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html= True)
 
 
@@ -52,13 +52,13 @@ st.markdown("""
 
 # Funções de criptografia e descriptografia
 def encrypt_number(number: str) -> str:
-    key = open('secret.key', 'rb').read()
+    key = open('pages/secret.key', 'rb').read()
     cipher_suite = Fernet(key)
     encrypted_number = cipher_suite.encrypt(number.encode())
     return encrypted_number.decode()
 
 def decrypt_code(encrypted_code: str) -> str:
-    key = open('secret.key', 'rb').read()
+    key = open('pages/secret.key', 'rb').read()
     cipher_suite = Fernet(key)
     try:
         decrypted_number = cipher_suite.decrypt(encrypted_code.encode())
@@ -187,7 +187,7 @@ def update_user_role(file_path, username, new_role):
         st.write(f"Usuário {username} não encontrado.")
 
 # Caminho para o arquivo de configuração
-file_path = '../config.yaml'
+file_path = 'pages/config.yaml'
 
 # Carregar a configuração
 config = load_config(file_path)

@@ -200,12 +200,28 @@ if st.session_state["authentication_status"]:
     if st.session_state["name"] is None:
         st.write('Aguarde...')
         st.session_state.sidebar = 'collapsed'
+        if 'role' in st.session_state:
+            del st.session_state['role']
         st.experimental_rerun()
         st.stop()
     else:
         st.session_state.sidebar = 'expanded'
-        pg = st.navigation([st.Page("Início.py"), st.Page("Dashboard.py"), st.Page("Faturas.py"), st.Page("Chamados.py")])
-        pg.run()
+        if 'current_page' not in st.session_state:
+            st.session_state['current_page'] = "Início.py"
+
+        pg = st.navigation([
+        st.Page("Início.py", default= True, url_path= 'pagina_inicial'),
+        st.Page("Dashboard.py"),
+        st.Page("Faturas.py"),
+        st.Page("Chamados.py")
+        ])
+
+        # Verifica se a página atual é a inicial e redireciona
+        if st.session_state['current_page'] == "Início.py":
+            pg.run()
+        else:
+            # Caso contrário, força a navegação para a página inicial
+            st.experimental_rerun()
 
     client_id = st.session_state["username"]
 
