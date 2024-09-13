@@ -191,101 +191,9 @@ try:
             'Password': 'Senha',
             'Login': 'Entrar'
         })
-        
 except LoginError as e:
     st.error(e)
-
-if st.session_state["authentication_status"]:
-    authenticator.logout(button_name= 'Sair')
-    if st.session_state["name"] is None:
-        st.write('Aguarde...')
-        st.session_state.sidebar = 'collapsed'
-        if 'role' in st.session_state:
-            del st.session_state['role']
-        st.experimental_rerun()
-        st.stop()
-    else:
-        st.session_state.sidebar = 'expanded'
-        if 'current_page' not in st.session_state:
-            st.session_state['current_page'] = "Início.py"
-
-        pg = st.navigation([
-        st.Page("Início.py", default= True, url_path= 'pagina_inicial'),
-        st.Page("Dashboard.py"),
-        st.Page("Faturas.py"),
-        st.Page("Chamados.py")
-        ])
-
-        # Verifica se a página atual é a inicial e redireciona
-        if st.session_state['current_page'] == "Início.py":
-            pg.run()
-        else:
-            # Caso contrário, força a navegação para a página inicial
-            st.experimental_rerun()
-
-    client_id = st.session_state["username"]
-
-    # Verificar se o código do cliente está presente
-    client_info = config['credentials']['usernames'][client_id]
-    if 'client_code' not in client_info or not client_info['client_code']:
-        st.info("Clique no botão 'Browse files' para adicionar a chave de acesso.")
-        arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="collapsed", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
-        if not arquivo_carregado:
-            st.warning('A chave de acesso garante a segurança de suas informações e será solicitada somente no primeiro acesso.')
-            st.stop()
-        st.success("Chave adicionada com sucesso!")
-                   
-        client_code_input = arquivo_carregado.read().decode("utf-8")
-        client_code_input_decript = decrypt_code(client_code_input)
-        if st.button("Salvar"):
-            client_code = client_code_input_decript
-            if client_code in data['EnterpriseName'].values or client_code == admin_code:
-                config['credentials']['usernames'][client_id]['client_code'] = client_code
-
-                # Salvar as informações atualizadas no arquivo YAML
-                with open('config.yaml', 'w', encoding='utf-8') as file:
-                    yaml.dump(config, file, default_flow_style=False)
-
-                st.success("Código do cliente atualizado com sucesso.")
-                st.experimental_rerun()
-            else:
-                st.error("Código do cliente não encontrado na base de dados.")
-                st.write(client_code, type(client_code), admin_code, type(admin_code))
-    else:
-        # Código do cliente já está presente, verifique se está na base de dados
-        tipo_usuario(client_id)
-        role = tipo_usuario(client_id)
-        st.session_state.role = role
-        
-
-        # Rodapé com HTML e CSS
-        footer = """
-        <style>
-        .footer {
-            position: fixed;
-            left: 0;
-            bottom: 0;
-            width: 100%;
-            background-color: #f1f1f1;
-            text-align: center;
-            padding: 3px;
-            font-size: 14px;
-            color: #555;
-            height: 30px;  /* Ajusta a altura do rodapé */
-        }
-        </style>
-        <div class="footer">
-            <p>© 2024 Canon do Brasil. Todos os direitos reservados.</p>
-        </div>
-        """
-
-        st.markdown(footer, unsafe_allow_html=True)
-
-            #st.dataframe(df_selection)
-            
-
-
-elif st.session_state["authentication_status"] is False:
+if st.session_state["authentication_status"] is False:
     with colpos2:
         st.error('Usuário/Senha incorreta')
 elif st.session_state["authentication_status"] is None:
@@ -360,3 +268,98 @@ if st.session_state["authentication_status"] is None or st.session_state["authen
 # Salvar as informações atualizadas no arquivo YAML
 with open('config.yaml', 'w', encoding='utf-8') as file:
     yaml.dump(config, file, default_flow_style=False)
+
+if 'url_path' not in st.session_state:
+    st.session_state.url_path = None
+
+
+if st.session_state["authentication_status"]and st.session_state.url_path is None:
+    authenticator.logout(button_name= 'Sair', location='sidebar')
+if st.session_state["name"] is None:
+    st.session_state.sidebar = 'collapsed'
+    if 'role' in st.session_state:
+        del st.session_state['role']
+    st.stop()
+else:
+    st.session_state.sidebar = 'expanded'
+    if 'current_page' not in st.session_state:
+        st.session_state['current_page'] = "Início.py"
+
+    pg = st.navigation([
+    st.Page("Início.py", default= True, url_path= 'pagina_inicial'),
+    st.Page("Dashboard.py"),
+    st.Page("Faturas.py"),
+    st.Page("Chamados.py")
+    ])
+    st.session_state.url_path = pg.url_path
+    if st.session_state.url_path != "Dashboard" and st.session_state.url_path != "Faturas" and st.session_state.url_path != "Chamados":
+        st.session_state.url_path = None    
+
+    # Verifica se a página atual é a inicial e redireciona
+    if st.session_state['current_page'] == "Início.py":
+        pg.run()
+    else:
+        # Caso contrário, força a navegação para a página inicial
+        st.experimental_rerun()
+
+client_id = st.session_state["username"]
+
+# Verificar se o código do cliente está presente
+client_info = config['credentials']['usernames'][client_id]
+if 'client_code' not in client_info or not client_info['client_code']:
+    st.session_state.sidebar = 'collapsed'
+    st.info("Clique no botão 'Browse files' para adicionar a chave de acesso.")
+    arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="collapsed", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
+    if not arquivo_carregado:
+        st.warning('A chave de acesso garante a segurança de suas informações e será solicitada somente no primeiro acesso.')
+        st.stop()
+    st.success("Chave adicionada com sucesso!")
+                
+    client_code_input = arquivo_carregado.read().decode("utf-8")
+    client_code_input_decript = decrypt_code(client_code_input)
+    if st.button("Salvar"):
+        client_code = client_code_input_decript
+        if client_code in data['EnterpriseName'].values or client_code == admin_code:
+            config['credentials']['usernames'][client_id]['client_code'] = client_code
+
+            # Salvar as informações atualizadas no arquivo YAML
+            with open('config.yaml', 'w', encoding='utf-8') as file:
+                yaml.dump(config, file, default_flow_style=False)
+
+            st.success("Código do cliente atualizado com sucesso.")
+            st.experimental_rerun()
+        else:
+            st.error("Código do cliente não encontrado na base de dados.")
+            st.write(client_code, type(client_code), admin_code, type(admin_code))
+else:
+    # Código do cliente já está presente, verifique se está na base de dados
+    tipo_usuario(client_id)
+    role = tipo_usuario(client_id)
+    st.session_state.role = role
+    
+
+    # Rodapé com HTML e CSS
+    footer = """
+    <style>
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        background-color: #f1f1f1;
+        text-align: center;
+        padding: 3px;
+        font-size: 14px;
+        color: #555;
+        height: 30px;  /* Ajusta a altura do rodapé */
+    }
+    </style>
+    <div class="footer">
+        <p>© 2024 Canon do Brasil. Todos os direitos reservados.</p>
+    </div>
+    """
+
+    st.markdown(footer, unsafe_allow_html=True)
+
+        #st.dataframe(df_selection)
+            

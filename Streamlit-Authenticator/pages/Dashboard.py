@@ -178,7 +178,7 @@ if st.session_state.role == 'admin': #Bloco de dashboard do administrador
                     df_grouped_EnterpriseName = df_selection.groupby('EnterpriseName', as_index=False).sum(numeric_only=True)
                     st.title("Clientes que mais imprimiram")
                     top_10 = df_grouped_EnterpriseName.nlargest(10, 'total')
-                    bar0 = px.bar(top_10, y='total', x='EnterpriseName', title='Top 10 clientes que mais imprimiram', color='EnterpriseName')
+                    bar0 = px.bar(top_10, y='total', x='EnterpriseName', title='Top 10 clientes que mais imprimiram', color='EnterpriseName', labels={'EnterpriseName':'Empresa', 'total':'Total Impresso'})
                     st.plotly_chart(bar0)
 
                     #Top 10 clientes que menos imprimiram
@@ -186,7 +186,7 @@ if st.session_state.role == 'admin': #Bloco de dashboard do administrador
                     st.title("Clientes que menos imprimiram")
                     df_filtered_enterprise = df_grouped_EnterpriseName[df_grouped_EnterpriseName['total'] > 0]
                     top_10 = df_filtered_enterprise.nsmallest(10, 'total')
-                    bar1 = px.bar(top_10, y='total', x='EnterpriseName', title='Top 10 clientes que menos imprimiram', color='EnterpriseName')
+                    bar1 = px.bar(top_10, y='total', x='EnterpriseName', title='Top 10 clientes que menos imprimiram', color='EnterpriseName',labels={'EnterpriseName':'Empresa', 'total':'Total Impresso'})
                     st.plotly_chart(bar1)
                     
                     #Top 10 equipamentos que mais imprimiram
@@ -331,7 +331,8 @@ else:  #Bloco de dashboard do cliente
             # Campo de entrada para o código do cliente na barra lateral
             with st.sidebar.expander('Atualizar chave de acesso'):
                 arquivo_carregado = st.file_uploader('Carregue o arquivo de Chave', label_visibility="collapsed", help='Arraste sua chave de cliente para esse espaço, o clique em "Browse files" para localiza-la')
-                st.info('Carregue sua chave de acesso')
+                if arquivo_carregado is None:
+                    st.info('Carregue sua chave de acesso')
                 if arquivo_carregado:
                     client_code_input = arquivo_carregado.read().decode("utf-8")
                     if st.button("Salvar"):

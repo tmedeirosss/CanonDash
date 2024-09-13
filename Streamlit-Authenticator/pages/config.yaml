@@ -6,17 +6,17 @@ credentials:
   usernames:
     administrador:
       client_code: '8236274157823465'
-      email: administrador@gmail.com
+      email: tmedeiros@cusa.canon.com
       failed_login_attempts: 0
       logged_in: true
       name: administrador
-      password: $2b$12$QJG/X7dhcVpvT6xwgBg3t.XryUCxOkFFMqAZsCln4HdoO86lIXlA6
+      password: $2b$12$rv.0i1DEc3AF4zM8LNQ46.TCGLsik0SrerbpM8V.wyrRVdfhh5Wei
       role: admin
     amaro:
       client_code: AMARO_LTDA
       email: amaro@gmail.com
       failed_login_attempts: 0
-      logged_in: true
+      logged_in: false
       name: amaro
       password: $2b$12$4Qd2mcrx1XojI/mz2uTFFeF4H32HxHI1triBFoXSQaeXO3qlyCVBe
       role: user
@@ -35,6 +35,14 @@ credentials:
       logged_in: false
       name: Thiago Teste
       password: $2b$12$I9EHF9ByzFlAWAw2vsV61.r7aGTNRU4zdVlTVtuKyGTa/92atsn7W
+      role: user
+    zelo:
+      client_code: ZELO
+      email: zelo@gmail.com
+      failed_login_attempts: 0
+      logged_in: false
+      name: zelo
+      password: $2b$12$15G1m2.f9tcilj/2d6sKJ.192zpQ./CVgLs.gNeRjOBn4uMW62JXC
       role: user
 form_labels:
   register:
